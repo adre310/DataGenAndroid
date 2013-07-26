@@ -3,10 +3,17 @@
  */
 package iae.home.datagenerator;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.RuntimeSingleton;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -56,10 +63,31 @@ public class Main {
 */
 
 		Serializer serializer = new Persister();
-		File result = new File("d:/temp/example.xml");
+		File result = new File("d:\\temp\\example.xml");
 		
 		try {
+			RuntimeSingleton.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "d:\\temp");
+			Velocity.init();
+			VelocityContext mVelContext=new VelocityContext();
 			ObjectModel om=serializer.read(ObjectModel.class, result);
+			mVelContext.put("fields", om.mFields);
+			
+			Template mTpl=null;
+			mTpl=Velocity.getTemplate("class.vm");
+			
+            BufferedWriter writer = writer = new BufferedWriter(
+                    new OutputStreamWriter(System.out));
+			
+            if ( mTpl != null)
+            	mTpl.merge(mVelContext, writer);
+
+            /*
+             *  flush and cleanup
+             */
+
+            writer.flush();
+            writer.close();
+            
 			System.out.println(om.msClass);
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());

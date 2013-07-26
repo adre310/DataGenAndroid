@@ -9,6 +9,8 @@ public class FieldModel {
 	@Attribute(name="name")
 	public String msName;
 
+	public String getName() { return msName; }
+	
 	@Attribute(name="column")
 	public String msColumn;
 	
