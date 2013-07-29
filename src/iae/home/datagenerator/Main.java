@@ -66,14 +66,14 @@ public class Main {
 		File result = new File("d:\\temp\\example.xml");
 		
 		try {
-			RuntimeSingleton.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "d:\\temp");
+			//RuntimeSingleton.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "d:\\temp");
 			Velocity.init();
 			VelocityContext mVelContext=new VelocityContext();
 			ObjectModel om=serializer.read(ObjectModel.class, result);
 			mVelContext.put("fields", om.mFields);
 			
 			Template mTpl=null;
-			mTpl=Velocity.getTemplate("class.vm");
+			mTpl=Velocity.getTemplate("/res/class.vm");
 			
             BufferedWriter writer = writer = new BufferedWriter(
                     new OutputStreamWriter(System.out));
