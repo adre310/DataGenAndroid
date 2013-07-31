@@ -1,5 +1,7 @@
 package iae.home.datagenerator.datamodel;
 
+import iae.home.datagenerator.utils.Utils;
+
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
@@ -7,11 +9,34 @@ import org.simpleframework.xml.Root;
 public class FieldModel {
 
 	@Attribute(name="name")
-	public String msName;
+	private String msName;
 
-	public String getName() { return msName; }
-	
 	@Attribute(name="column")
-	public String msColumn;
+	private String msColumn;
+
+	@Attribute(name="type")
+	private String msType;
+
+	@Attribute(name="required",required=false)
+	private Boolean msRequired=false;
 	
+	public String getName() { 
+		return msName; 
+	}
+
+	public String getColumn() { 
+		return msColumn; 
+	}
+
+	public String getType() { 
+		return msType; 
+	}
+
+	public String getColumnType() { 
+		return Utils.getColumnTypeByType(msType); 
+	}
+	
+	public Boolean getRequired() { 
+		return msRequired; 
+	}
 }

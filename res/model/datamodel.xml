@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<model  xmlns="http://money2013.net/datagenerator/2013/07/27">
+    <version>11</version>
+    <object name="Pay" table="pays">
+        <version>11</version>
+        <field name="Guid" column="r_guid" type="String" />
+        <field name="Modified" column="modified" type="Boolean" />
+        <field name="Deleted" column="deleted" type="Boolean" />
+        <field name="Notes" column="notes" type="String" />
+        <field name="Value" column="pay_value" type="Double" />
+        <field name="Date" column="pay_date" type="Date" />
+        <field name="AccountID" column="account_id" type="Integer" />
+        <field name="CategoryID" column="category_id" type="Integer" />
+        <field name="IsSystem" column="is_system" type="Boolean" />
+        </object>
+    <object name="Account" table="accounts">
+        <version>11</version>
+        <field name="n1" column="name" type="String" />
+        <field name="n2" column="name" type="String" />
+        <field name="n3" column="name" type="String" />
+    </object>
+    <object name="Category" table="categories">
+        <version>11</version>
+        <field name="name" column="name" type="String" />
+    </object>
+</model>

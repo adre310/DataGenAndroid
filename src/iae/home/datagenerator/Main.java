@@ -5,19 +5,16 @@ package iae.home.datagenerator;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.RuntimeSingleton;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
-import iae.home.datagenerator.datamodel.AppSettings;
+import iae.home.datagenerator.datamodel.DataModel;
 import iae.home.datagenerator.datamodel.FieldModel;
 import iae.home.datagenerator.datamodel.ObjectModel;
 
@@ -63,32 +60,59 @@ public class Main {
 */
 
 		Serializer serializer = new Persister();
-		File result = new File("d:\\temp\\example.xml");
+		File result = new File("./res/model/datamodel.xml");
 		
 		try {
+			DataModel om=serializer.read(DataModel.class, result);
+			
+			
 			//RuntimeSingleton.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "d:\\temp");
 			Velocity.init();
-			VelocityContext mVelContext=new VelocityContext();
-			ObjectModel om=serializer.read(ObjectModel.class, result);
-			mVelContext.put("fields", om.mFields);
+			Template tplClassBLL=null;
+			Template tplClassDAL=null;
+			tplClassBLL=Velocity.getTemplate("/res/template/classBll.tpl");
+			tplClassDAL=Velocity.getTemplate("/res/template/classDAL.tpl");
 			
-			Template mTpl=null;
-			mTpl=Velocity.getTemplate("/res/class.vm");
-			
-            BufferedWriter writer = writer = new BufferedWriter(
-                    new OutputStreamWriter(System.out));
-			
-            if ( mTpl != null)
-            	mTpl.merge(mVelContext, writer);
+			for (ObjectModel obj : om.getObjects()) {
+				VelocityContext context=new VelocityContext();
+				context.put("name", obj.getName());
+				context.put("table", obj.getTable());
+				context.put("version", obj.getVersion());
+				context.put("fields",obj.getFields());
 
-            /*
-             *  flush and cleanup
-             */
+				FileWriter writer=new FileWriter(new File("D:/temp/out/"+obj.getName()+"BLL.java"));
+				
+	            if ( tplClassBLL != null)
+	            	tplClassBLL.merge(context, writer);
 
-            writer.flush();
-            writer.close();
-            
-			System.out.println(om.msClass);
+	            /*
+	             *  flush and cleanup
+	             */
+
+	            writer.flush();
+	            writer.close();
+			}
+			
+			for (ObjectModel obj : om.getObjects()) {
+				VelocityContext context=new VelocityContext();
+				context.put("name", obj.getName());
+				context.put("table", obj.getTable());
+				context.put("version", obj.getVersion());
+				context.put("fields",obj.getFields());
+
+				FileWriter writer=new FileWriter(new File("D:/temp/out/"+obj.getName()+"DAL.java"));
+				
+	            if ( tplClassDAL != null)
+	            	tplClassDAL.merge(context, writer);
+
+	            /*
+	             *  flush and cleanup
+	             */
+
+	            writer.flush();
+	            writer.close();
+			}
+			
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());
 		}
