@@ -70,8 +70,10 @@ public class Main {
 			Velocity.init();
 			Template tplClassBLL=null;
 			Template tplClassDAL=null;
+			Template tplProvider=null; 
 			tplClassBLL=Velocity.getTemplate("/res/template/classBll.tpl");
 			tplClassDAL=Velocity.getTemplate("/res/template/classDAL.tpl");
+			tplProvider=Velocity.getTemplate("/res/template/provider.tpl");
 			
 			for (ObjectModel obj : om.getObjects()) {
 				VelocityContext context=new VelocityContext();
@@ -79,6 +81,7 @@ public class Main {
 				context.put("table", obj.getTable());
 				context.put("version", obj.getVersion());
 				context.put("fields",obj.getFields());
+				context.put("views",obj.getViews());
 
 				FileWriter writer=new FileWriter(new File("D:/temp/out/"+obj.getName()+"BLL.java"));
 				
@@ -99,6 +102,7 @@ public class Main {
 				context.put("table", obj.getTable());
 				context.put("version", obj.getVersion());
 				context.put("fields",obj.getFields());
+				context.put("views",obj.getViews());
 
 				FileWriter writer=new FileWriter(new File("D:/temp/out/"+obj.getName()+"DAL.java"));
 				
@@ -112,6 +116,21 @@ public class Main {
 	            writer.flush();
 	            writer.close();
 			}
+
+			VelocityContext context=new VelocityContext();
+			context.put("model", om);
+
+			FileWriter writer=new FileWriter(new File("D:/temp/out/MoneyProvider.java"));
+			
+            if ( tplProvider != null)
+            	tplProvider.merge(context, writer);
+
+            /*
+             *  flush and cleanup
+             */
+
+            writer.flush();
+            writer.close();
 			
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());

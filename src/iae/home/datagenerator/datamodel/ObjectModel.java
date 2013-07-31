@@ -23,6 +23,9 @@ public class ObjectModel {
 	
 	@ElementList(inline=true)
 	private List<FieldModel> mFields=null;
+
+	@ElementList(inline=true,required=false)
+	private List<ViewModel> mViews=null;
 	
 	public Integer getVersion() { 
 		return mVersion;
@@ -40,5 +43,16 @@ public class ObjectModel {
 		if(mFields==null) 
 			mFields=new ArrayList<FieldModel>();
 		return mFields;
+	}
+
+	public List<ViewModel> getViews() {
+		if(mViews==null) 
+			mViews=new ArrayList<ViewModel>();
+		return mViews;
+	}
+	
+	@Override
+	public String toString() {
+		return msName;
 	}
 }

@@ -39,4 +39,10 @@ public class FieldModel {
 	public Boolean getRequired() { 
 		return msRequired; 
 	}
+	
+	@Override
+	public String toString() {
+		return msName;
+	}
+
 }

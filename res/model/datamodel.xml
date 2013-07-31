@@ -4,23 +4,36 @@
     <object name="Pay" table="pays">
         <version>11</version>
         <field name="Guid" column="r_guid" type="String" />
-        <field name="Modified" column="modified" type="Boolean" />
-        <field name="Deleted" column="deleted" type="Boolean" />
+        <field name="Modified" column="modified" type="boolean" />
+        <field name="Deleted" column="deleted" type="boolean" />
         <field name="Notes" column="notes" type="String" />
-        <field name="Value" column="pay_value" type="Double" />
-        <field name="Date" column="pay_date" type="Date" />
-        <field name="AccountID" column="account_id" type="Integer" />
-        <field name="CategoryID" column="category_id" type="Integer" />
-        <field name="IsSystem" column="is_system" type="Boolean" />
-        </object>
+        <field name="Value" column="pay_value" type="double" />
+        <field name="Created" column="pay_date" type="Date" />
+        <field name="AccountID" column="account_id" type="long" />
+        <field name="CategoryID" column="category_id" type="long" />
+        <field name="IsSystem" column="is_system" type="boolean" />
+        
+        <view name="List">
+            <column name="Value" expr="pay_value" />
+        </view>
+    </object>
     <object name="Account" table="accounts">
         <version>11</version>
-        <field name="n1" column="name" type="String" />
-        <field name="n2" column="name" type="String" />
-        <field name="n3" column="name" type="String" />
+        <field name="Guid" column="r_guid" type="String" />
+        <field name="Modified" column="modified" type="boolean" />
+        <field name="Deleted" column="deleted" type="boolean" />
+        <field name="Notes" column="notes" type="String" />
+        <field name="Name" column="name" type="String" />
+        <field name="Currency" column="currency" type="String" />
     </object>
     <object name="Category" table="categories">
         <version>11</version>
-        <field name="name" column="name" type="String" />
+        <field name="Guid" column="r_guid" type="String" />
+        <field name="Modified" column="modified" type="boolean" />
+        <field name="Deleted" column="deleted" type="boolean" />
+        <field name="Notes" column="notes" type="String" />
+        <field name="Name" column="name" type="String" />
+        <field name="IsDefault" column="is_default" type="boolean" />
+        <field name="Theme" column="theme_id" type="int" />
     </object>
 </model>
