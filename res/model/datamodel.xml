@@ -14,12 +14,17 @@
         <field name="IsSystem" column="is_system" type="boolean" />
         
         <view name="List" alias="p">
-        	<column name="Notes" expr="p.notes" />
+            <column name="Guid" expr="p.r_guid" />
+            <column name="Deleted" expr="p.deleted" />
+            <column name="Notes" expr="p.notes" />
             <column name="Value" expr="p.pay_value" />
             <column name="Created" expr="p.pay_date" />
             <column name="AccountName" expr="a.name" />
+            <column name="AccountGuid" expr="a.r_guid" />
             <column name="CategoryName" expr="c.name" />
+            <column name="CategoryGuid" expr="c.r_guid" />
             <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" />
+            <column name="IsSystem" expr="p.is_system" />
             <join object="Account" alias="a" on="p.account_id=a._id" />
             <join object="Category" alias="c" on="p.category_id=c._id" />
         </view>
