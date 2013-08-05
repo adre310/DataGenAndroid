@@ -83,7 +83,7 @@ public class Main {
 				context.put("fields",obj.getFields());
 				context.put("views",obj.getViews());
 
-				FileWriter writer=new FileWriter(new File("D:/temp/out/"+obj.getName()+"BLL.java"));
+				FileWriter writer=new FileWriter(new File("D:/temp/out/bll/objects/"+obj.getName()+"BLL.java"));
 				
 	            if ( tplClassBLL != null)
 	            	tplClassBLL.merge(context, writer);
@@ -104,7 +104,7 @@ public class Main {
 				context.put("fields",obj.getFields());
 				context.put("views",obj.getViews());
 
-				FileWriter writer=new FileWriter(new File("D:/temp/out/"+obj.getName()+"DAL.java"));
+				FileWriter writer=new FileWriter(new File("D:/temp/out/dal/"+obj.getName()+"DAL.java"));
 				
 	            if ( tplClassDAL != null)
 	            	tplClassDAL.merge(context, writer);
@@ -120,7 +120,7 @@ public class Main {
 			VelocityContext context=new VelocityContext();
 			context.put("model", om);
 
-			FileWriter writer=new FileWriter(new File("D:/temp/out/MoneyProvider.java"));
+			FileWriter writer=new FileWriter(new File("D:/temp/out/dal/MoneyProvider.java"));
 			
             if ( tplProvider != null)
             	tplProvider.merge(context, writer);

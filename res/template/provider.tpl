@@ -27,6 +27,8 @@ import android.util.Log;
  */
 public class MoneyProvider extends ContentProvider {
 
+public static final String CONTENT_AUTHORITY = "iae.home.money2011.v2.provider";
+
     private static final UriMatcher mUriMatcher;
     private MoneyDatabase mOpenHelper;
 
@@ -52,7 +54,7 @@ private static HashMap<String, String> m${object.Name}${view.Name}ProjectionMap;
 
 static {
 mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-final String authority=BaseEntity.CONTENT_AUTHORITY;
+final String authority=CONTENT_AUTHORITY;
 
 #foreach($object in $model.objects)
 mUriMatcher.addURI(authority, "${object.Name}", ID_${object.Name.toUpperCase()});
@@ -71,15 +73,22 @@ m${object.Name}ProjectionMap.put(${object.Name}DAL.COL_${field.Name.toUpperCase(
 
 #foreach($view in $object.Views)
 m${object.Name}${view.Name}ProjectionMap=new HashMap<String, String>();
-m${object.Name}${view.Name}ProjectionMap.put("_id", "_id");
+m${object.Name}${view.Name}ProjectionMap.put("_id", "${view.Alias}._id");
 #foreach($column in $view.Columns)
 m${object.Name}${view.Name}ProjectionMap.put(${object.Name}DAL.View${view.Name}.COL_${column.Name.toUpperCase()}, "${column.Expr} AS "+${object.Name}DAL.View${view.Name}.COL_${column.Name.toUpperCase()});
 #end
+
 #end
 #end
 
 };
 
+@Override
+public boolean onCreate() {
+	final Context context = getContext();
+    mOpenHelper=new MoneyDatabase(context);
+	return true;
+}
 
 @Override
 public String getType(Uri uri) {
@@ -131,6 +140,7 @@ public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
 	final SQLiteDatabase database = mOpenHelper.getReadableDatabase();
     SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+    Cursor cursor=null;
 	final int match = mUriMatcher.match(uri);
 	switch(match) {
 #foreach($object in $model.objects)
@@ -138,7 +148,7 @@ public Cursor query(Uri uri, String[] projection, String selection,
 case ID_${object.Name.toUpperCase()}_ITEM:
         qb.setTables(${object.Name}DAL.TABLE);
         qb.setProjectionMap(m${object.Name}ProjectionMap);
-        qb.appendWhere(${object.Name}DAL.COL_DELETED+"=0 AND _id="+uri.getPathSegments().get(1));
+        qb.appendWhere("_id="+uri.getPathSegments().get(1));
         cursor=qb.query(
         			database, 
         			projection, 
@@ -150,7 +160,6 @@ case ID_${object.Name.toUpperCase()}_ITEM:
 case ID_${object.Name.toUpperCase()}:
         qb.setTables(${object.Name}DAL.TABLE);
         qb.setProjectionMap(m${object.Name}ProjectionMap);
-        qb.appendWhere(${object.Name}DAL.COL_DELETED+"=0");
         cursor=qb.query(
         			database, 
         			projection, 
@@ -161,14 +170,13 @@ case ID_${object.Name.toUpperCase()}:
         break;
 #foreach($view in $object.Views)
 case ID_${object.Name.toUpperCase()}_VIEW_${view.Name.toUpperCase()}:
-        qb.setTables(${object.Name}DAL.TABLE);
+        qb.setTables(${object.Name}DAL.TABLE+" ${view.Alias}"#foreach($join in $view.Joins)+" LEFT OUTER JOIN "+${join.Object}DAL.TABLE+" ${join.Alias} ON ${join.On}"#end);
         qb.setProjectionMap(m${object.Name}${view.Name}ProjectionMap);
-        qb.appendWhere(${object.Name}DAL.COL_DELETED+"=0");
         cursor=qb.query(
         			database, 
         			projection, 
         			selection, selectionArgs, 
-        			null,
+        			#if(${view.IsGroupByExists})"${view.GroupBy}"#{else}null#end,
         			null,
         			sortOrder);
         break;
@@ -205,6 +213,12 @@ default:
         
 getContext().getContentResolver().notifyChange(uri, null);
 return count;
+}
+
+@Override
+public int delete(Uri uri, String arg1, String[] arg2) {
+		// TODO Auto-generated method stub
+		return 0;
 }
 
 }

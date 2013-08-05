@@ -9,12 +9,19 @@
         <field name="Notes" column="notes" type="String" />
         <field name="Value" column="pay_value" type="double" />
         <field name="Created" column="pay_date" type="Date" />
-        <field name="AccountID" column="account_id" type="long" />
-        <field name="CategoryID" column="category_id" type="long" />
+        <field name="Account" column="account_id" type="long" />
+        <field name="Category" column="category_id" type="long" />
         <field name="IsSystem" column="is_system" type="boolean" />
         
-        <view name="List">
-            <column name="Value" expr="pay_value" />
+        <view name="List" alias="p">
+        	<column name="Notes" expr="p.notes" />
+            <column name="Value" expr="p.pay_value" />
+            <column name="Created" expr="p.pay_date" />
+            <column name="AccountName" expr="a.name" />
+            <column name="CategoryName" expr="c.name" />
+            <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" />
+            <join object="Account" alias="a" on="p.account_id=a._id" />
+            <join object="Category" alias="c" on="p.category_id=c._id" />
         </view>
     </object>
     <object name="Account" table="accounts">
@@ -25,6 +32,13 @@
         <field name="Notes" column="notes" type="String" />
         <field name="Name" column="name" type="String" />
         <field name="Currency" column="currency" type="String" />
+        <view name="List" alias="a" groupBy="a._id">
+        	<column name="Notes" expr="a.notes" />
+        	<column name="Name" expr="a.name" />
+        	<column name="Currency" expr="a.currency" />
+        	<column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
+        	<join object="Pay" alias="p" on="p.account_id=a._id AND p.deleted=0" />
+       	</view>
     </object>
     <object name="Category" table="categories">
         <version>11</version>
@@ -35,5 +49,12 @@
         <field name="Name" column="name" type="String" />
         <field name="IsDefault" column="is_default" type="boolean" />
         <field name="Theme" column="theme_id" type="int" />
+    </object>
+    <object name="CurrencyCode" table="currency_code">
+        <field name="Code" column="code" type="String" />
+        <field name="Notes" column="notes" type="String" />
+    </object>
+    <object name="Sync" table="sync_info">
+        <field name="Updated" column="sync_date" type="Date" />
     </object>
 </model>
