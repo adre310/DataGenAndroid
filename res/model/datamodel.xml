@@ -24,6 +24,7 @@
             <column name="Created" expr="p.pay_date" />
             <column name="AccountName" expr="a.name" />
             <column name="AccountGuid" expr="a.r_guid" />
+            <column name="Currency" expr="a.currency" />
             <column name="CategoryName" expr="c.name" />
             <column name="CategoryGuid" expr="c.r_guid" />
             <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" />

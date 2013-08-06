@@ -25,7 +25,7 @@ import android.util.Log;
  * @author aisaev
  *
  */
-public class MoneyProvider extends ContentProvider {
+public final class MoneyProvider extends ContentProvider {
 
 public static final String CONTENT_AUTHORITY = "iae.home.money2011.v2.provider";
 
@@ -216,9 +216,46 @@ return count;
 }
 
 @Override
-public int delete(Uri uri, String arg1, String[] arg2) {
-		// TODO Auto-generated method stub
-		return 0;
+public int delete(Uri uri, String selection, String[] selectionArgs) {
+final int match = mUriMatcher.match(uri);
+int count=0;
+SQLiteDatabase database = mOpenHelper.getWritableDatabase();
+
+switch (match) {
+#foreach($object in $model.objects)
+
+case ID_${object.Name.toUpperCase()}_ITEM:
+    count=database.delete(${object.Name}DAL.TABLE,  "_id=?", new String[] { uri.getPathSegments().get(1) });
+	break;
+case ID_${object.Name.toUpperCase()}:
+    count=database.delete(${object.Name}DAL.TABLE, selection, selectionArgs);
+	break;
+#end
+default:
+	throw new IllegalArgumentException("Unknown URI " + uri);
+}
+        
+getContext().getContentResolver().notifyChange(uri, null);
+return count;
+}
+
+@Override
+public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) 
+            throws OperationApplicationException {
+SQLiteDatabase database = mOpenHelper.getWritableDatabase();
+database.beginTransaction();
+try {
+	int numOperations = operations.size();
+	ContentProviderResult[] results = new ContentProviderResult[numOperations];
+	for (int i = 0; i < numOperations; i++) {
+		results[i] = operations.get(i).apply(this, results, i);
+		database.yieldIfContendedSafely();
+	}
+	database.setTransactionSuccessful();
+	return results;
+} finally {
+	database.endTransaction();
+}
 }
 
 }

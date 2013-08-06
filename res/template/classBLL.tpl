@@ -14,7 +14,7 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
-public class ${name}BLL implements Parcelable {
+public final class ${name}BLL implements Parcelable {
 
 public static final String[] ITEM_PROJECTION=new String[] {
 "_id"
@@ -99,7 +99,7 @@ public static final Parcelable.Creator<${name}BLL> CREATOR=
 
 // Views
 #foreach($view in $views)
-public static class View${view.Name} {
+public final static class View${view.Name} {
 
 public static final String[] ITEM_PROJECTION=new String[] {
 "_id"

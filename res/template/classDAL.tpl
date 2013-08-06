@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 
-public class ${name}DAL {
+public final class ${name}DAL {
 public static final String TABLE="${table}";
 
 public static final String CONTENT_TYPE ="vnd.android.cursor.dir/vnd.money2013.${name}";
