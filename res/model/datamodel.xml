@@ -9,6 +9,9 @@
         <field name="Notes" column="notes" type="String" />
         <field name="Value" column="pay_value" type="double" />
         <field name="Created" column="pay_date" type="Date" />
+        <field name="CreatedYear" column="pay_year" type="int" />
+        <field name="CreatedMonth" column="pay_month" type="int" />
+		<field name="CreatedDay" column="pay_day" type="int" />
         <field name="Account" column="account_id" type="long" />
         <field name="Category" column="category_id" type="long" />
         <field name="IsSystem" column="is_system" type="boolean" />

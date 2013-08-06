@@ -73,7 +73,7 @@ m${object.Name}ProjectionMap.put(${object.Name}DAL.COL_${field.Name.toUpperCase(
 
 #foreach($view in $object.Views)
 m${object.Name}${view.Name}ProjectionMap=new HashMap<String, String>();
-m${object.Name}${view.Name}ProjectionMap.put("_id", "${view.Alias}._id");
+m${object.Name}${view.Name}ProjectionMap.put("_id", "${view.Alias}._id AS _id");
 #foreach($column in $view.Columns)
 m${object.Name}${view.Name}ProjectionMap.put(${object.Name}DAL.View${view.Name}.COL_${column.Name.toUpperCase()}, "${column.Expr} AS "+${object.Name}DAL.View${view.Name}.COL_${column.Name.toUpperCase()});
 #end
