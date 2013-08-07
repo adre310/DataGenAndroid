@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.util.Log;
+import iae.home.money2011.v2.GlobalSettings;
 
 /**
  * @author aisaev
@@ -57,10 +58,10 @@ mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 final String authority=CONTENT_AUTHORITY;
 
 #foreach($object in $model.objects)
-mUriMatcher.addURI(authority, "${object.Name}", ID_${object.Name.toUpperCase()});
-mUriMatcher.addURI(authority, "${object.Name}/#", ID_${object.Name.toUpperCase()}_ITEM);
+mUriMatcher.addURI(GlobalSettings.CONTENT_AUTHORITY, "${object.Name}", ID_${object.Name.toUpperCase()});
+mUriMatcher.addURI(GlobalSettings.CONTENT_AUTHORITY, "${object.Name}/#", ID_${object.Name.toUpperCase()}_ITEM);
 #foreach($view in $object.Views)
-mUriMatcher.addURI(authority, "${object.Name}/${view.Name}", ID_${object.Name.toUpperCase()}_VIEW_${view.Name.toUpperCase()});
+mUriMatcher.addURI(GlobalSettings.CONTENT_AUTHORITY, "${object.Name}/${view.Name}", ID_${object.Name.toUpperCase()}_VIEW_${view.Name.toUpperCase()});
 #end
 #end
 
