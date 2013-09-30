@@ -18,6 +18,12 @@ import iae.home.datagenerator.datamodel.DataModel;
 import iae.home.datagenerator.datamodel.FieldModel;
 import iae.home.datagenerator.datamodel.ObjectModel;
 import iae.home.datagenerator.datamodel.ResStrings;
+import iae.home.datagenerator.datamodel.UIButton;
+import iae.home.datagenerator.datamodel.UICheckBox;
+import iae.home.datagenerator.datamodel.UIEditText;
+import iae.home.datagenerator.datamodel.UILinearLayout;
+import iae.home.datagenerator.datamodel.UISpinner;
+import iae.home.datagenerator.datamodel.UITextView;
 
 /**
  * @author aisaev
@@ -32,7 +38,7 @@ public class Main {
 
 		Serializer serializer = new Persister();
 		File result = new File("./res/model/datamodel.xml");
-		File resFile= new File("./res/strings.xml");
+		File resFile= new File("./res/strings_bll.xml");
 		
 		try {
 			DataModel om=serializer.read(DataModel.class, result);
@@ -40,6 +46,9 @@ public class Main {
 			ResStrings resStrings=serializer.read(ResStrings.class, resFile);
 		
 			ExecStrings(resStrings, om);
+			
+			//ExecLayout();
+			
 			//RuntimeSingleton.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "d:\\temp");
 			Velocity.init();
 			Template tplClassBLL=null;
@@ -119,7 +128,7 @@ public class Main {
 	
 	private static void ExecStrings(ResStrings resStrings,DataModel om) throws Exception {
 		Serializer serializer = new Persister();
-		File file=new File("D:/temp/out/strings.xml");
+		File file=new File("D:/temp/out/strings_bll.xml");
 		
 		for(ObjectModel obj : om.getObjects()) {
 			String keyObj=obj.getName().toLowerCase();
@@ -145,5 +154,22 @@ public class Main {
 		}
 		
 		serializer.write(resStrings, file);
+	}
+	
+	private static void ExecLayout() throws Exception {
+		Serializer serializer = new Persister();
+		File file=new File("D:/temp/out/l1.xml");
+		
+		UILinearLayout linLayout=new UILinearLayout();
+		linLayout.getChilds().add(new UITextView("1"));
+		linLayout.getChilds().add(new UIEditText("2"));
+		linLayout.getChilds().add(new UITextView("3"));
+		linLayout.getChilds().add(new UIButton("4"));
+		linLayout.getChilds().add(new UITextView("5"));
+		linLayout.getChilds().add(new UISpinner("6"));
+		linLayout.getChilds().add(new UICheckBox("7","8"));
+		linLayout.getChilds().add(new UITextView("9"));
+		
+		serializer.write(linLayout, file);
 	}
 }

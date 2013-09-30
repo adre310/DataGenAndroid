@@ -63,7 +63,8 @@
         <field name="Code" column="code" type="String" />
         <field name="Notes" column="notes" type="String" />
     </object>
-    <object name="Sync" table="sync_info">
-        <field name="Updated" column="sync_date" type="Date" />
+    <object name="ApplicationSettings" table="app_settings">
+        <field name="Name" column="key_name" type="String" />
+        <field name="Value" column="key_value" type="String" />
     </object>
 </model>
