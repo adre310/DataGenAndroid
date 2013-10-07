@@ -58,10 +58,31 @@
         <field name="Name" column="name" type="String" />
         <field name="IsDefault" column="is_default" type="boolean" />
         <field name="Theme" column="theme_id" type="int" />
+        <view name="ReportByCategory" alias="c" groupBy="c._id,a.currency">
+            <column name="Category" expr="c.name" />
+            <column name="Currency" expr="a.currency" />
+            <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
+            <join object="Pay" alias="p" on="p.category_id=c._id AND p.deleted=0" />
+            <join object="Account" alias="a" on="a._id=p.account_id AND a.deleted=0" />
+        </view>
     </object>
     <object name="CurrencyCode" table="currency_code">
         <field name="Code" column="code" type="String" />
         <field name="Notes" column="notes" type="String" />
+        <view name="ReportByCurrency" alias="cc" groupBy="cc._id">
+            <column name="Currency" expr="cc.code" />
+            <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
+            <join object="Account" alias="a" on="a.currency=cc.code AND a.deleted=0" />
+            <join object="Pay" alias="p" on="p.account_id=a._id AND p.deleted=0" />
+        </view>
+        <view name="ReportByMonth" alias="cc" groupBy="cc._id,p.pay_year,p.pay_month">
+            <column name="Currency" expr="cc.code" />
+        	<column name="Year" expr="p.pay_year" />
+        	<column name="Month" expr="p.pay_month" />
+            <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
+        	<join object="Account" alias="a" on="a.currency=cc.code AND a.deleted=0" />
+            <join object="Pay" alias="p" on="p.account_id=a._id AND p.deleted=0" />
+        </view>
     </object>
     <object name="ApplicationSettings" table="app_settings">
         <field name="Name" column="key_name" type="String" />

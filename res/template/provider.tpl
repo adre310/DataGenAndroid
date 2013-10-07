@@ -129,7 +129,6 @@ public Uri insert(Uri uri, ContentValues values) {
 // If the insert succeeded, the row ID exists.
 	if (rowId > 0) {
         Uri retUri = uri.buildUpon().appendPath(Long.toString(rowId)).build();
-        getContext().getContentResolver().notifyChange(retUri, null);
         return retUri;
     }
 
@@ -146,7 +145,7 @@ public Cursor query(Uri uri, String[] projection, String selection,
 	switch(match) {
 #foreach($object in $model.objects)
 
-case ID_${object.Name.toUpperCase()}_ITEM:
+	case ID_${object.Name.toUpperCase()}_ITEM:
         qb.setTables(${object.Name}DAL.TABLE);
         qb.setProjectionMap(m${object.Name}ProjectionMap);
         qb.appendWhere("_id="+uri.getPathSegments().get(1));
@@ -158,7 +157,7 @@ case ID_${object.Name.toUpperCase()}_ITEM:
         			null,
         			sortOrder);
         break;
-case ID_${object.Name.toUpperCase()}:
+	case ID_${object.Name.toUpperCase()}:
         qb.setTables(${object.Name}DAL.TABLE);
         qb.setProjectionMap(m${object.Name}ProjectionMap);
         cursor=qb.query(
@@ -170,7 +169,7 @@ case ID_${object.Name.toUpperCase()}:
         			sortOrder);
         break;
 #foreach($view in $object.Views)
-case ID_${object.Name.toUpperCase()}_VIEW_${view.Name.toUpperCase()}:
+	case ID_${object.Name.toUpperCase()}_VIEW_${view.Name.toUpperCase()}:
         qb.setTables(${object.Name}DAL.TABLE+" ${view.Alias}"#foreach($join in $view.Joins)+" LEFT OUTER JOIN "+${join.Object}DAL.TABLE+" ${join.Alias} ON ${join.On}"#end);
         qb.setProjectionMap(m${object.Name}${view.Name}ProjectionMap);
         cursor=qb.query(
@@ -183,80 +182,78 @@ case ID_${object.Name.toUpperCase()}_VIEW_${view.Name.toUpperCase()}:
         break;
 #end
 #end
-default:
-	throw new IllegalArgumentException("Unknown URI " + uri);
-}
+	default:
+		throw new IllegalArgumentException("Unknown URI " + uri);
+	}
         
-cursor.setNotificationUri(getContext().getContentResolver(), uri);
-return cursor;
+	cursor.setNotificationUri(getContext().getContentResolver(), uri);
+	return cursor;
 }
 
 @Override
 public int update(Uri uri, ContentValues values, String selection,
 		String[] selectionArgs) {
-final int match = mUriMatcher.match(uri);
-int count=0;
-SQLiteDatabase database = mOpenHelper.getWritableDatabase();
+	final int match = mUriMatcher.match(uri);
+	int count=0;
+	SQLiteDatabase database = mOpenHelper.getWritableDatabase();
 
-switch (match) {
+	switch (match) {
 #foreach($object in $model.objects)
 
-case ID_${object.Name.toUpperCase()}_ITEM:
-    count=database.update(${object.Name}DAL.TABLE, values, "_id=?", new String[] { uri.getPathSegments().get(1) });
-	break;
-case ID_${object.Name.toUpperCase()}:
-    count=database.update(${object.Name}DAL.TABLE, values, selection, selectionArgs);
-	break;
+	case ID_${object.Name.toUpperCase()}_ITEM:
+    	count=database.update(${object.Name}DAL.TABLE, values, "_id=?", new String[] { uri.getPathSegments().get(1) });
+		break;
+	case ID_${object.Name.toUpperCase()}:
+    	count=database.update(${object.Name}DAL.TABLE, values, selection, selectionArgs);
+		break;
 #end
-default:
-	throw new IllegalArgumentException("Unknown URI " + uri);
-}
+	default:
+		throw new IllegalArgumentException("Unknown URI " + uri);
+	}
         
-getContext().getContentResolver().notifyChange(uri, null);
-return count;
+	return count;
 }
 
 @Override
 public int delete(Uri uri, String selection, String[] selectionArgs) {
-final int match = mUriMatcher.match(uri);
-int count=0;
-SQLiteDatabase database = mOpenHelper.getWritableDatabase();
+	final int match = mUriMatcher.match(uri);
+	int count=0;
+	SQLiteDatabase database = mOpenHelper.getWritableDatabase();
 
-switch (match) {
+	switch (match) {
 #foreach($object in $model.objects)
 
-case ID_${object.Name.toUpperCase()}_ITEM:
-    count=database.delete(${object.Name}DAL.TABLE,  "_id=?", new String[] { uri.getPathSegments().get(1) });
-	break;
-case ID_${object.Name.toUpperCase()}:
-    count=database.delete(${object.Name}DAL.TABLE, selection, selectionArgs);
-	break;
+	case ID_${object.Name.toUpperCase()}_ITEM:
+    	count=database.delete(${object.Name}DAL.TABLE,  "_id=?", new String[] { uri.getPathSegments().get(1) });
+		break;
+	case ID_${object.Name.toUpperCase()}:
+    	count=database.delete(${object.Name}DAL.TABLE, selection, selectionArgs);
+		break;
 #end
-default:
-	throw new IllegalArgumentException("Unknown URI " + uri);
-}
+	default:
+		throw new IllegalArgumentException("Unknown URI " + uri);
+	}
         
-getContext().getContentResolver().notifyChange(uri, null);
-return count;
+	return count;
 }
 
 @Override
 public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) 
             throws OperationApplicationException {
-SQLiteDatabase database = mOpenHelper.getWritableDatabase();
-database.beginTransaction();
-try {
-	int numOperations = operations.size();
-	ContentProviderResult[] results = new ContentProviderResult[numOperations];
-	for (int i = 0; i < numOperations; i++) {
-		results[i] = operations.get(i).apply(this, results, i);
-		database.yieldIfContendedSafely();
+	SQLiteDatabase database = mOpenHelper.getWritableDatabase();
+	database.beginTransaction();
+	try {
+		int numOperations = operations.size();
+		ContentProviderResult[] results = new ContentProviderResult[numOperations];
+		for (int i = 0; i < numOperations; i++) {
+			results[i] = operations.get(i).apply(this, results, i);
+			database.yieldIfContendedSafely();
+		}
+		database.setTransactionSuccessful();
+		return results;
+	} finally {
+		database.endTransaction();
 	}
-	database.setTransactionSuccessful();
-	return results;
-} finally {
-	database.endTransaction();
-}
 }
 
 }
