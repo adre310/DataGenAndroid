@@ -26,5 +26,11 @@ public class ViewJoin {
 	public String getOn() { 
 		return msOn; 
 	}
+
+    @Override
+    public String toString() {
+        return "ViewJoin{" + "msObject=" + msObject + ", msAlias=" + msAlias + ", msOn=" + msOn + '}';
+    }
 	
+        
 }

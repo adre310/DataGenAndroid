@@ -50,9 +50,11 @@ public class ObjectModel {
 			mViews=new ArrayList<ViewModel>();
 		return mViews;
 	}
-	
-	@Override
-	public String toString() {
-		return msName;
-	}
+
+    @Override
+    public String toString() {
+        return "ObjectModel{" + "msName=" + msName + ", msTable=" + msTable + ", mVersion=" + mVersion + '}';
+    }
+
+        
 }

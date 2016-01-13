@@ -52,10 +52,11 @@ public class ViewModel {
 			mJoins=new ArrayList<ViewJoin>();
 		return mJoins;
 	}
+
+    @Override
+    public String toString() {
+        return "ViewModel{" + "msName=" + msName + ", msAlias=" + msAlias + ", msGroup=" + msGroup + '}';
+    }
 	
-	@Override
-	public String toString() {
-		return msName;
-	}
 	
 }

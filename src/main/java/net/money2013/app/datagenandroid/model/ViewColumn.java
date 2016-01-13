@@ -18,10 +18,11 @@ public class ViewColumn {
 	public String getExpr() { 
 		return msExpr; 
 	}
+
+    @Override
+    public String toString() {
+        return "ViewColumn{" + "msName=" + msName + ", msExpr=" + msExpr + '}';
+    }
 	
-	@Override
-	public String toString() {
-		return msName;
-	}
 
 }

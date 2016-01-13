@@ -38,10 +38,11 @@ public class FieldModel {
 	public Boolean getRequired() { 
 		return msRequired; 
 	}
+
+    @Override
+    public String toString() {
+        return "FieldModel{" + "msName=" + msName + ", msColumn=" + msColumn + ", msType=" + msType + ", msRequired=" + msRequired + '}';
+    }
 	
-	@Override
-	public String toString() {
-		return msName;
-	}
 
 }
