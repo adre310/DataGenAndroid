@@ -30,10 +30,6 @@ public class FieldModel {
 	public String getType() { 
 		return msType; 
 	}
-
-	public String getColumnType() { 
-		return Utils.getColumnTypeByType(msType); 
-	}
 	
 	public Boolean getRequired() { 
 		return msRequired; 
