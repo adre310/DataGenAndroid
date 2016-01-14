@@ -30,13 +30,20 @@ import net.money2013.app.datagenandroid.utils.Utils;
 public class ClassJavaGen {
 
     private final DataModel dataModel;
-    private static final ClassName GlobalSettingsClass = ClassName.get(GlobalSettings.PACKAGE_NAME, "GlobalSettings");
-    private static final ClassName ContentProviderClass = ClassName.get("android.content", "ContentProvider");
-    private static final ClassName UriClass = ClassName.get("android.net", "Uri");
-    private static final ClassName defaultGetResolverClass = ClassName.get("com.pushtorefresh.storio.sqlite.operations.get", "DefaultGetResolver");
+    private static final ClassName globalSettingsClass = ClassName.get(GlobalSettings.PACKAGE_NAME, "GlobalSettings");
+    private static final ClassName contentProviderClass = ClassName.get("android.content", "ContentProvider");
+    private static final ClassName contentValueClass = ClassName.get("android.content","ContentValues");
+    private static final ClassName uriClass = ClassName.get("android.net", "Uri");
+    private static final ClassName defaultGetResolverClass = ClassName.get("com.pushtorefresh.storio.contentresolver.operations.get", "DefaultGetResolver");
+    private static final ClassName defaultPutResolverClass = ClassName.get("com.pushtorefresh.storio.contentresolver.operations.put", "DefaultPutResolver");
+    private static final ClassName defaultDeleteResolverClass = ClassName.get("com.pushtorefresh.storio.contentresolver.operations.delete", "DefaultDeleteResolver");
+    private static final ClassName insertQueryClass = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","InsertQuery");
+    private static final ClassName updateQueryClass = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","UpdateQuery");
+    private static final ClassName deleteQueryClass = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","DeleteQuery");
     private static final ClassName cursorClass = ClassName.get("android.database", "Cursor");
     private static final ClassName nonNullClass = ClassName.get("android.support.annotation", "NonNull");
     private static final ClassName bllConverterClass = ClassName.get("net.money2013.share.util", "BLLConverter");
+    
 
     public ClassJavaGen(DataModel dataModel) {
         this.dataModel = dataModel;
@@ -47,6 +54,8 @@ public class ClassJavaGen {
             GenMetaClass(objectModel);
             GenModelClass(objectModel);
             GenGetResolver(objectModel);
+            GenPutResolver(objectModel);
+            GenDeleteResolver(objectModel);
         }
     }
 
@@ -60,11 +69,13 @@ public class ClassJavaGen {
 
         objectJavaClassBuilder.addField(tableSpec);
 
-        FieldSpec uriSpec = FieldSpec.builder(UriClass, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", UriClass, "content://", GlobalSettingsClass, "/" + objectModel.getName())
+        /*
+        FieldSpec uriSpec = FieldSpec.builder(uriClass, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", uriClass, "content://", globalSettingsClass, "/" + objectModel.getName())
                 .build();
         objectJavaClassBuilder.addField(uriSpec);
-
+        */
+        
         List<String> fieldList = new ArrayList<>();
         fieldList.add("_id INTEGER PRIMARY KEY AUTOINCREMENT");
         FieldSpec fieldSpecId = FieldSpec.builder(String.class, "COL_ID", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
@@ -174,4 +185,77 @@ public class ClassJavaGen {
         JavaFile javaFile = JavaFile.builder(GlobalSettings.PACKAGE_NAME + ".resolver", objectJavaClassBuilder.build()).build();
         javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
     }
+    
+    private void GenPutResolver(ObjectModel objectModel) throws IOException {
+        ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+        ClassName modelClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".model", objectModel.getName());
+
+        TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder(objectModel.getName() + "PutResolver")
+                .superclass(ParameterizedTypeName.get(defaultPutResolverClass, modelClass))
+                .addModifiers(Modifier.PUBLIC);
+
+        MethodSpec.Builder mapToInsertQuery=MethodSpec.methodBuilder("mapToInsertQuery")
+                .returns(insertQueryClass)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addAnnotation(nonNullClass)
+                .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(nonNullClass).build())
+                .addStatement("return $T.builder().uri($S + $T.CONTENT_AUTHORITY + $S).build()", insertQueryClass, "content://", globalSettingsClass, "/" + objectModel.getName());
+                
+        objectJavaClassBuilder.addMethod(mapToInsertQuery.build());
+
+        MethodSpec.Builder mapToUpdateQuery=MethodSpec.methodBuilder("mapToUpdateQuery")
+                .returns(updateQueryClass)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addAnnotation(nonNullClass)
+                .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(nonNullClass).build())
+                .addStatement("return $T.builder().uri($S + $T.CONTENT_AUTHORITY + $S).where($S).whereArgs($T.toString(object.getId())).build()", updateQueryClass, "content://", globalSettingsClass, "/" + objectModel.getName(),"_id = ?",Long.class);
+                
+        objectJavaClassBuilder.addMethod(mapToUpdateQuery.build());
+
+        MethodSpec.Builder mapToContentValues=MethodSpec.methodBuilder("mapToContentValues")
+                .returns(contentValueClass)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addAnnotation(nonNullClass)
+                .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(nonNullClass).build())
+                .addStatement("final $T contentValues=new $T()", contentValueClass, contentValueClass);
+        
+        for(FieldModel fieldModel : objectModel.getFields()) {
+            mapToContentValues
+                .addStatement("contentValues.put($T.COL_$L, $T.ObjectToCV(object.get$L()))", metaClass, fieldModel.getName().toUpperCase(), bllConverterClass, fieldModel.getName());
+        }
+        
+        mapToContentValues
+                .addStatement("return contentValues");
+        
+        objectJavaClassBuilder.addMethod(mapToContentValues.build());
+
+        JavaFile javaFile = JavaFile.builder(GlobalSettings.PACKAGE_NAME + ".resolver", objectJavaClassBuilder.build()).build();
+        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+    }
+    
+    private void GenDeleteResolver(ObjectModel objectModel) throws IOException {
+        ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+        ClassName modelClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".model", objectModel.getName());
+
+        TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder(objectModel.getName() + "DeleteResolver")
+                .superclass(ParameterizedTypeName.get(defaultDeleteResolverClass, modelClass))
+                .addModifiers(Modifier.PUBLIC);
+
+        MethodSpec.Builder mapToDeleteQuery=MethodSpec.methodBuilder("mapToDeleteQuery")
+                .returns(deleteQueryClass)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addAnnotation(nonNullClass)
+                .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(nonNullClass).build())
+                .addStatement("return $T.builder().uri($S + $T.CONTENT_AUTHORITY + $S).where($S).whereArgs($T.toString(object.getId())).build()", deleteQueryClass, "content://", globalSettingsClass, "/" + objectModel.getName(),"_id = ?",Long.class);
+                
+        objectJavaClassBuilder.addMethod(mapToDeleteQuery.build());
+        
+        JavaFile javaFile = JavaFile.builder(GlobalSettings.PACKAGE_NAME + ".resolver", objectJavaClassBuilder.build()).build();
+        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+    }
+    
 }
