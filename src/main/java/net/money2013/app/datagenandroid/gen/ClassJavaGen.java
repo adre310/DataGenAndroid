@@ -37,6 +37,7 @@ public class ClassJavaGen {
     private static final ClassName defaultGetResolverClass = ClassName.get("com.pushtorefresh.storio.contentresolver.operations.get", "DefaultGetResolver");
     private static final ClassName defaultPutResolverClass = ClassName.get("com.pushtorefresh.storio.contentresolver.operations.put", "DefaultPutResolver");
     private static final ClassName defaultDeleteResolverClass = ClassName.get("com.pushtorefresh.storio.contentresolver.operations.delete", "DefaultDeleteResolver");
+    private static final ClassName ResolverClass = ClassName.get("com.pushtorefresh.storio.contentresolver","ContentResolverTypeMapping");
     private static final ClassName insertQueryClass = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","InsertQuery");
     private static final ClassName updateQueryClass = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","UpdateQuery");
     private static final ClassName deleteQueryClass = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","DeleteQuery");
@@ -53,9 +54,7 @@ public class ClassJavaGen {
         for (ObjectModel objectModel : dataModel.getObjects()) {
             GenMetaClass(objectModel);
             GenModelClass(objectModel);
-            GenGetResolver(objectModel);
-            GenPutResolver(objectModel);
-            GenDeleteResolver(objectModel);
+            GenResolver(objectModel);
         }
     }
 
@@ -257,5 +256,27 @@ public class ClassJavaGen {
         JavaFile javaFile = JavaFile.builder(GlobalSettings.PACKAGE_NAME + ".resolver", objectJavaClassBuilder.build()).build();
         javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
     }
-    
+
+    private void GenResolver(ObjectModel objectModel) throws IOException {
+        ClassName modelClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".model", objectModel.getName());
+        ClassName getRslvClass=ClassName.get(GlobalSettings.PACKAGE_NAME + ".resolver",objectModel.getName() + "GetResolver"); 
+        ClassName putRslvClass=ClassName.get(GlobalSettings.PACKAGE_NAME + ".resolver",objectModel.getName() + "PutResolver"); 
+        ClassName deleteRslvClass=ClassName.get(GlobalSettings.PACKAGE_NAME + ".resolver",objectModel.getName() + "DeleteResolver"); 
+        
+        GenGetResolver(objectModel);
+        GenPutResolver(objectModel);
+        GenDeleteResolver(objectModel);
+        
+        TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder(objectModel.getName() + "Resolver")
+                .superclass(ParameterizedTypeName.get(ResolverClass, modelClass))
+                .addModifiers(Modifier.PUBLIC);
+        
+        MethodSpec constr=MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("super(new $T(),new $T(),new $T())", putRslvClass, getRslvClass, deleteRslvClass)
+                .build();
+        objectJavaClassBuilder.addMethod(constr);
+        JavaFile javaFile = JavaFile.builder(GlobalSettings.PACKAGE_NAME + ".resolver", objectJavaClassBuilder.build()).build();
+        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));        
+    }    
 }
