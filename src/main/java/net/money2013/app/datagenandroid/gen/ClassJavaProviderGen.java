@@ -35,6 +35,9 @@ public class ClassJavaProviderGen {
     private static final ClassName nonNullClass = ClassName.get("android.support.annotation", "NonNull");
     private static final ClassName hashMapClass=ClassName.get("java.util","HashMap");
     private static final ClassName moneyDatabase=ClassName.get(GlobalSettings.PACKAGE_NAME+ ".provider","MoneyDatabase");
+    private static final ClassName sqLiteDatabaseClass=ClassName.get("android.database.sqlite","SQLiteDatabase");
+    private static final ClassName sqLiteExceptionClass=ClassName.get("android.database","SQLException");
+    private static final ClassName sqLiteBuilderClass=ClassName.get("android.database.sqlite","SQLiteQueryBuilder");
 
     public ClassJavaProviderGen(DataModel dataModel) {
         this.dataModel = dataModel;
@@ -44,12 +47,14 @@ public class ClassJavaProviderGen {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder("MoneyProvider")
                 .superclass(contentProviderClass)
                 .addModifiers(Modifier.PUBLIC);
-        
+
+        genGetType(objectJavaClassBuilder);
         genStatic(objectJavaClassBuilder);
         genOnCreate(objectJavaClassBuilder);
+        genQuery(objectJavaClassBuilder);
         genInsert(objectJavaClassBuilder);
         genUpdate(objectJavaClassBuilder);
-        genQuery(objectJavaClassBuilder);
+        genDelete(objectJavaClassBuilder);
         
         JavaFile javaFile = JavaFile.builder(GlobalSettings.PACKAGE_NAME + ".provider", objectJavaClassBuilder.build())
                 .build();
@@ -67,18 +72,21 @@ public class ClassJavaProviderGen {
                     .build());
         }
         
+        /*
         for(ObjectModel objectModel : dataModel.getObjects()) {
             classBuilder.addField(FieldSpec.builder(ParameterizedTypeName.get(hashMapClass, ClassName.get(String.class), ClassName.get(String.class)), objectModel.getName()+"ProjectionMap", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
                     .initializer("new $T()", ParameterizedTypeName.get(hashMapClass, ClassName.get(String.class), ClassName.get(String.class)))
                     .build());
         }
+        */
+        
         CodeBlock.Builder codeBlock=CodeBlock.builder();
         for(ObjectModel objectModel : dataModel.getObjects()) {
             codeBlock
                 .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", globalSettingsClass, objectModel.getName(), "ID_"+objectModel.getName().toUpperCase());
         }
         
-        
+        /*
         for(ObjectModel objectModel : dataModel.getObjects()) {
             String mapName=objectModel.getName()+"ProjectionMap";
             ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
@@ -87,10 +95,29 @@ public class ClassJavaProviderGen {
                 codeBlock.addStatement("$L.put($T.COL_$L, $T.COL_$L)", mapName, metaClass, fieldModel.getName().toUpperCase(), metaClass, fieldModel.getName().toUpperCase());
             }
          }
+        */
         
         classBuilder.addStaticBlock(codeBlock.build());
     }
-    
+
+    private void genGetType(TypeSpec.Builder classBuilder) {
+        MethodSpec.Builder getTypeMethod=MethodSpec.methodBuilder("getType")
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(uriClass)
+                    .addParameter(uriClass, "uri")
+                ;
+
+        getTypeMethod.addStatement("final int match = uriMatcher.match(uri)");
+        getTypeMethod.beginControlFlow("switch (match)");
+        for(ObjectModel objectModel : dataModel.getObjects()) {
+            getTypeMethod.addStatement("case $L: return $S; break", "ID_"+objectModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+objectModel.getName());
+        }
+        getTypeMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
+        getTypeMethod.endControlFlow();
+        classBuilder.addMethod(getTypeMethod.build());
+    }
+        
     private void genOnCreate(TypeSpec.Builder classBuilder) {
         classBuilder.addField(
                 FieldSpec.builder(moneyDatabase, "dbOpenHelper", Modifier.PRIVATE)
@@ -115,6 +142,22 @@ public class ClassJavaProviderGen {
                     .addParameter(uriClass, "uri")
                     .addParameter(contentValueClass,"values")
                 ;
+        insertMethod.addStatement("final int match = uriMatcher.match(uri)");
+        insertMethod.addStatement("long rowId = -1");
+        insertMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",sqLiteDatabaseClass);
+        insertMethod.beginControlFlow("switch (match)");
+        for(ObjectModel objectModel : dataModel.getObjects()) {
+            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            insertMethod.addStatement("case ID_$L: rowId = database.insertOrThrow($T.TABLE, null, values); break", objectModel.getName().toUpperCase(),metaClass);
+        }
+        insertMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
+        insertMethod.endControlFlow();
+        
+        insertMethod.beginControlFlow("if(rowId > 0)");
+        insertMethod.addStatement("$T retUri = uri.buildUpon().appendPath(Long.toString(rowId)).build()", uriClass);
+        insertMethod.addStatement("return retUri");
+        insertMethod.endControlFlow();
+        insertMethod.addStatement("throw new $T($S + uri)",sqLiteExceptionClass, "Failed to insert row into ");
         
         classBuilder.addMethod(insertMethod.build());
     }
@@ -130,7 +173,22 @@ public class ClassJavaProviderGen {
                     .addParameter(String[].class,"selectionArgs")
                     .addParameter(String.class,"sortOrder")
                 ;
+        queryMethod.addStatement("final int match = uriMatcher.match(uri)");
+        queryMethod.addStatement("$T qb = new $T()", sqLiteBuilderClass, sqLiteBuilderClass);
+        queryMethod.addStatement("$T cursor = null", cursorClass);
+        queryMethod.beginControlFlow("switch (match)");
+        for(ObjectModel objectModel : dataModel.getObjects()) {
+            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            queryMethod.addStatement("case ID_$L: qb.setTables($T.TABLE)", objectModel.getName().toUpperCase(),metaClass);
+            queryMethod.addStatement("cursor = qb.query(database, projection,selection, selectionArgs, null, null, sortOrder)");
+            queryMethod.addStatement("break");
+        }
+        queryMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
+        queryMethod.endControlFlow();
         
+        queryMethod.addStatement("cursor.setNotificationUri(getContext().getContentResolver(), uri)");
+        queryMethod.addStatement("return cursor");
+
         classBuilder.addMethod(queryMethod.build());
     }    
 
@@ -144,7 +202,44 @@ public class ClassJavaProviderGen {
                     .addParameter(String.class,"selection")
                     .addParameter(String[].class,"selectionArgs")
                 ;
+
+        updateMethod.addStatement("final int match = uriMatcher.match(uri)");
+        updateMethod.addStatement("int count = 0");
+        updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",sqLiteDatabaseClass);
+        updateMethod.beginControlFlow("switch (match)");
+        for(ObjectModel objectModel : dataModel.getObjects()) {
+            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            updateMethod.addStatement("case ID_$L: count = database.update($T.TABLE, values, selection, selectionArgs); break", objectModel.getName().toUpperCase(),metaClass);
+        }
+        updateMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
+        updateMethod.endControlFlow();
         
+        updateMethod.addStatement("return count");
+        classBuilder.addMethod(updateMethod.build());
+    }    
+
+    private void genDelete(TypeSpec.Builder classBuilder) {
+        MethodSpec.Builder updateMethod=MethodSpec.methodBuilder("delete")
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(int.class)
+                    .addParameter(uriClass, "uri")
+                    .addParameter(String.class,"selection")
+                    .addParameter(String[].class,"selectionArgs")
+                ;
+
+        updateMethod.addStatement("final int match = uriMatcher.match(uri)");
+        updateMethod.addStatement("int count = 0");
+        updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",sqLiteDatabaseClass);
+        updateMethod.beginControlFlow("switch (match)");
+        for(ObjectModel objectModel : dataModel.getObjects()) {
+            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            updateMethod.addStatement("case ID_$L: count = database.delete($T.TABLE, selection, selectionArgs); break", objectModel.getName().toUpperCase(),metaClass);
+        }
+        updateMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
+        updateMethod.endControlFlow();
+        
+        updateMethod.addStatement("return count");
         classBuilder.addMethod(updateMethod.build());
     }    
     
