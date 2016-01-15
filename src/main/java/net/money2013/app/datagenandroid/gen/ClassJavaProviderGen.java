@@ -104,7 +104,7 @@ public class ClassJavaProviderGen {
         MethodSpec.Builder getTypeMethod=MethodSpec.methodBuilder("getType")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(uriClass)
+                    .returns(String.class)
                     .addParameter(uriClass, "uri")
                 ;
 
