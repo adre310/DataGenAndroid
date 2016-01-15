@@ -84,4 +84,8 @@
             <join object="Pay" alias="p" on="p.account_id=a._id AND p.deleted=0" />
         </view>
     </object>
+    <object name="ApplicationSettings" table="app_settings">
+        <field name="Name" column="key_name" type="String" />
+        <field name="Value" column="key_value" type="String" />
+    </object>
 </model>
