@@ -111,7 +111,7 @@ public class ClassJavaProviderGen {
         getTypeMethod.addStatement("final int match = uriMatcher.match(uri)");
         getTypeMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
-            getTypeMethod.addStatement("case $L: return $S; break", "ID_"+objectModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+objectModel.getName());
+            getTypeMethod.addStatement("case $L: return $S", "ID_"+objectModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+objectModel.getName());
         }
         getTypeMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
         getTypeMethod.endControlFlow();
@@ -173,9 +173,10 @@ public class ClassJavaProviderGen {
                     .addParameter(String[].class,"selectionArgs")
                     .addParameter(String.class,"sortOrder")
                 ;
-        queryMethod.addStatement("final int match = uriMatcher.match(uri)");
+        queryMethod.addStatement("$T database = dbOpenHelper.getReadableDatabase()",sqLiteDatabaseClass);
         queryMethod.addStatement("$T qb = new $T()", sqLiteBuilderClass, sqLiteBuilderClass);
         queryMethod.addStatement("$T cursor = null", cursorClass);
+        queryMethod.addStatement("final int match = uriMatcher.match(uri)");
         queryMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
             ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");

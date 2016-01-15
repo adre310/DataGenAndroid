@@ -42,7 +42,7 @@ public class ClassJavaGen {
     private static final ClassName deleteQueryClass = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","DeleteQuery");
     private static final ClassName cursorClass = ClassName.get("android.database", "Cursor");
     private static final ClassName nonNullClass = ClassName.get("android.support.annotation", "NonNull");
-    private static final ClassName bllConverterClass = ClassName.get("net.money2013.share.util", "BLLConverter");
+    private static final ClassName bllConverterClass = ClassName.get(GlobalSettings.PACKAGE_NAME+".util", "BLLConverter");
     
 
     public ClassJavaGen(DataModel dataModel) {
