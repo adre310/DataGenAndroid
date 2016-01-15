@@ -61,7 +61,7 @@ public class ClassJavaGen {
 
     private void GenMetaClass(ObjectModel objectModel) throws IOException {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.interfaceBuilder(objectModel.getName() + "Meta")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+                .addModifiers(Modifier.PUBLIC);
 
         FieldSpec tableSpec = FieldSpec.builder(String.class, "TABLE", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
                 .initializer("$S", objectModel.getTable())
