@@ -122,6 +122,15 @@ public class ClassJavaGen {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder(objectModel.getName())
                 .addModifiers(Modifier.PUBLIC);
 
+        objectJavaClassBuilder.addField(
+                FieldSpec.builder(
+                    ParameterizedTypeName.get(GlobalSettings.BEFORE_UPDATE_CLASS, ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName())),
+                    "onBeforeSave",
+                    Modifier.STATIC, Modifier.PUBLIC)
+                .initializer("null")
+                .build()
+        );
+
         objectJavaClassBuilder.addField(FieldSpec.builder(Long.class, "mId", Modifier.PRIVATE)
                 .build());
 
@@ -298,6 +307,10 @@ public class ClassJavaGen {
                 .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(GlobalSettings.NON_NULL_CLASS).build())
                 .addStatement("final $T contentValues=new $T()", GlobalSettings.CONTENT_VALUE_CLASS, GlobalSettings.CONTENT_VALUE_CLASS);
 
+        mapToContentValues.beginControlFlow("if($T.onBeforeSave != null)", modelClass);
+        mapToContentValues.addStatement("$T.onBeforeSave.BeforeSave(object)", modelClass);
+        mapToContentValues.endControlFlow();
+        
         for (FieldModel fieldModel : objectModel.getFields()) {
             mapToContentValues
                     .addStatement("contentValues.put($T.COL_$L, $T.ObjectToCV(object.get$L()))", metaClass, fieldModel.getName().toUpperCase(), GlobalSettings.BLL_CONVERTER_CLASS, fieldModel.getName());

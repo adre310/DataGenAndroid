@@ -33,13 +33,14 @@ public interface GlobalSettings {
     public static final ClassName DELETE_QUERY_CLASS = ClassName.get("com.pushtorefresh.storio.contentresolver.queries","DeleteQuery");
     public static final ClassName CURSOR_CLASS = ClassName.get("android.database", "Cursor");
     public static final ClassName NON_NULL_CLASS = ClassName.get("android.support.annotation", "NonNull");
-    public static final ClassName BLL_CONVERTER_CLASS = ClassName.get(PERSIST_PACKAGE_NAME+".util", "BLLConverter");    
     public static final ClassName URI_MATCHER_CLASS=ClassName.get("android.content","UriMatcher");
     public static final ClassName HASH_MAP_CLASS=ClassName.get("java.util","HashMap");
     public static final ClassName MONEY_DATABASE_CLASS=ClassName.get(PROVIDER_PACKAGE_NAME,"MoneyDatabase");
     public static final ClassName SQL_DATABASE_CLASS=ClassName.get("android.database.sqlite","SQLiteDatabase");
     public static final ClassName SQL_EXCEPTION_CLASS=ClassName.get("android.database","SQLException");
     public static final ClassName SQL_BUILDER_CLASS=ClassName.get("android.database.sqlite","SQLiteQueryBuilder");
+    public static final ClassName BLL_CONVERTER_CLASS = ClassName.get(PERSIST_PACKAGE_NAME+".util", "BLLConverter");    
+    public static final ClassName BEFORE_UPDATE_CLASS = ClassName.get(PERSIST_PACKAGE_NAME+".util", "OnBeforeUpdate");
     
 
 }
