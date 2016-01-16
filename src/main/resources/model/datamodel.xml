@@ -11,27 +11,10 @@
         <field name="Created" column="pay_date" type="Date" />
         <field name="CreatedYear" column="pay_year" type="int" />
         <field name="CreatedMonth" column="pay_month" type="int" />
-		<field name="CreatedDay" column="pay_day" type="int" />
+        <field name="CreatedDay" column="pay_day" type="int" />
         <field name="Account" column="account_id" type="long" />
         <field name="Category" column="category_id" type="long" />
-        <field name="IsSystem" column="is_system" type="boolean" />
-        
-        <view name="List" alias="p">
-            <column name="Guid" expr="p.r_guid" />
-            <column name="Deleted" expr="p.deleted" />
-            <column name="Notes" expr="p.notes" />
-            <column name="Value" expr="p.pay_value" />
-            <column name="Created" expr="p.pay_date" />
-            <column name="AccountName" expr="a.name" />
-            <column name="AccountGuid" expr="a.r_guid" />
-            <column name="Currency" expr="a.currency" />
-            <column name="CategoryName" expr="c.name" />
-            <column name="CategoryGuid" expr="c.r_guid" />
-            <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" />
-            <column name="IsSystem" expr="p.is_system" />
-            <join object="Account" alias="a" on="p.account_id=a._id" />
-            <join object="Category" alias="c" on="p.category_id=c._id" />
-        </view>
+        <field name="IsSystem" column="is_system" type="boolean" />        
     </object>
     <object name="Account" table="accounts">
         <version>11</version>
@@ -41,13 +24,6 @@
         <field name="Notes" column="notes" type="String" />
         <field name="Name" column="name" type="String" />
         <field name="Currency" column="currency" type="String" />
-        <view name="List" alias="a" groupBy="a._id">
-        	<column name="Notes" expr="a.notes" />
-        	<column name="Name" expr="a.name" />
-        	<column name="Currency" expr="a.currency" />
-        	<column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
-        	<join object="Pay" alias="p" on="p.account_id=a._id AND p.deleted=0" />
-       	</view>
     </object>
     <object name="Category" table="categories">
         <version>11</version>
@@ -58,34 +34,60 @@
         <field name="Name" column="name" type="String" />
         <field name="IsDefault" column="is_default" type="boolean" />
         <field name="Theme" column="theme_id" type="int" />
-        <view name="ReportByCategory" alias="c" groupBy="c._id,a.currency">
-            <column name="Category" expr="c.name" />
-            <column name="Currency" expr="a.currency" />
-            <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
-            <join object="Pay" alias="p" on="p.category_id=c._id AND p.deleted=0" />
-            <join object="Account" alias="a" on="a._id=p.account_id AND a.deleted=0" />
-        </view>
     </object>
     <object name="CurrencyCode" table="currency_code">
         <field name="Code" column="code" type="String" />
         <field name="Notes" column="notes" type="String" />
-        <view name="ReportByCurrency" alias="cc" groupBy="cc._id">
-            <column name="Currency" expr="cc.code" />
-            <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
-            <join object="Account" alias="a" on="a.currency=cc.code AND a.deleted=0" />
-            <join object="Pay" alias="p" on="p.account_id=a._id AND p.deleted=0" />
-        </view>
-        <view name="ReportByMonth" alias="cc" groupBy="cc._id,p.pay_year,p.pay_month">
-            <column name="Currency" expr="cc.code" />
-        	<column name="Year" expr="p.pay_year" />
-        	<column name="Month" expr="p.pay_month" />
-            <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" />
-        	<join object="Account" alias="a" on="a.currency=cc.code AND a.deleted=0" />
-            <join object="Pay" alias="p" on="p.account_id=a._id AND p.deleted=0" />
-        </view>
     </object>
     <object name="ApplicationSettings" table="app_settings">
         <field name="Name" column="key_name" type="String" />
         <field name="Value" column="key_value" type="String" />
     </object>
+    <view name="PayList"  table="pays p">
+        <column name="_id" expr="p._id"  type="long" />
+        <column name="Guid" expr="p.r_guid"  type="String" />
+        <column name="Deleted" expr="p.deleted"  type="boolean" />
+        <column name="Notes" expr="p.notes"  type="String" />
+        <column name="Value" expr="p.pay_value"  type="double" />
+        <column name="Created" expr="p.pay_date"  type="Date" />
+        <column name="AccountName" expr="a.name"  type="String" />
+        <column name="AccountGuid" expr="a.r_guid"  type="String" />
+        <column name="Currency" expr="a.currency"  type="String" />
+        <column name="CategoryName" expr="c.name"  type="String" />
+        <column name="CategoryGuid" expr="c.r_guid"  type="String" />
+        <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" type="int" />
+        <column name="IsSystem" expr="p.is_system"  type="boolean" />
+        <join join="eft outer join accounts a on p.account_id=a._id" />
+        <join join="left outer join categories c on p.category_id=c._id" />
+    </view>
+    <view name="AccountList"  table="accounts a" groupBy="a._id">
+        <column name="_id" expr="a._id"  type="long" />
+        <column name="Notes" expr="a.notes"   type="String"/>
+        <column name="Name" expr="a.name"   type="String"/>
+        <column name="Currency" expr="a.currency"   type="String"/>
+        <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" type="double"/>
+        <join join="left outer join pays p on p.account_id=a._id AND p.deleted=0" />
+    </view>
+    <view name="ReportByCategory" table="categories c" groupBy="c.name,a.currency">
+        <column name="_id" expr="c.name"  type="String" />
+        <column name="Category" expr="c.name"  type="String" />
+        <column name="Currency" expr="a.currency"  type="String" />
+        <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)"  type="double"/>
+        <join join="inner join pays p on p.category_id=c._id AND p.deleted=0" />
+        <join join="inner join accounts a on a._id=p.account_id AND a.deleted=0" />
+    </view>
+    <view name="ReportByCurrency" table="pays p" groupBy="a.currency">
+        <column name="_id" expr="a.currency"  type="String" />
+        <column name="Currency" expr="a.currency" type="String"/>
+        <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" type="double" />
+        <join join="inner join accounts a on a._id=p.account_id AND a.deleted=0" />
+    </view>
+    <view name="ReportByMonth" table="pays p" groupBy="a.currency,p.pay_year,p.pay_month">
+        <column name="_id" expr="p.pay_year*100+p.pay_month"  type="long" />
+        <column name="Currency" expr="a.currency" type="String"/>
+        <column name="Year" expr="p.pay_year" type="int"/>
+        <column name="Month" expr="p.pay_month" type="int"/>
+        <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" type="double"/>
+        <join join="inner join accounts a on a._id=p.account_id AND a.deleted=0" />
+    </view>    
 </model>

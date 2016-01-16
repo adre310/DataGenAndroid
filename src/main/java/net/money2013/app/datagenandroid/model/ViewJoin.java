@@ -5,32 +5,11 @@ import org.simpleframework.xml.Root;
 
 @Root(name="join")
 public class ViewJoin {
+    @Attribute(name="join", required = true)
+    private String join;
 
-	@Attribute(name="object")
-	private String msObject;
-
-	@Attribute(name="alias")
-	private String msAlias;
-
-	@Attribute(name="on")
-	private String msOn;
-	
-	public String getObject() { 
-		return msObject; 
-	}
-
-	public String getAlias() { 
-		return msAlias; 
-	}
-
-	public String getOn() { 
-		return msOn; 
-	}
-
-    @Override
-    public String toString() {
-        return "ViewJoin{" + "msObject=" + msObject + ", msAlias=" + msAlias + ", msOn=" + msOn + '}';
+    public String getJoin() {
+        return join;
     }
-	
         
 }

@@ -19,6 +19,8 @@ import net.money2013.app.datagenandroid.GlobalSettings;
 import net.money2013.app.datagenandroid.model.DataModel;
 import net.money2013.app.datagenandroid.model.FieldModel;
 import net.money2013.app.datagenandroid.model.ObjectModel;
+import net.money2013.app.datagenandroid.model.ViewColumn;
+import net.money2013.app.datagenandroid.model.ViewModel;
 
 /**
  *
@@ -26,18 +28,6 @@ import net.money2013.app.datagenandroid.model.ObjectModel;
  */
 public class ClassJavaProviderGen {
     private final DataModel dataModel;
-    private static final ClassName globalSettingsClass = ClassName.get(GlobalSettings.PACKAGE_NAME, "GlobalSettings");
-    private static final ClassName contentProviderClass = ClassName.get("android.content", "ContentProvider");
-    private static final ClassName contentValueClass = ClassName.get("android.content","ContentValues");
-    private static final ClassName uriClass = ClassName.get("android.net", "Uri");
-    private static final ClassName uriMatcherClass=ClassName.get("android.content","UriMatcher");
-    private static final ClassName cursorClass = ClassName.get("android.database", "Cursor");
-    private static final ClassName nonNullClass = ClassName.get("android.support.annotation", "NonNull");
-    private static final ClassName hashMapClass=ClassName.get("java.util","HashMap");
-    private static final ClassName moneyDatabase=ClassName.get(GlobalSettings.PACKAGE_NAME+ ".provider","MoneyDatabase");
-    private static final ClassName sqLiteDatabaseClass=ClassName.get("android.database.sqlite","SQLiteDatabase");
-    private static final ClassName sqLiteExceptionClass=ClassName.get("android.database","SQLException");
-    private static final ClassName sqLiteBuilderClass=ClassName.get("android.database.sqlite","SQLiteQueryBuilder");
 
     public ClassJavaProviderGen(DataModel dataModel) {
         this.dataModel = dataModel;
@@ -45,7 +35,7 @@ public class ClassJavaProviderGen {
 
     public void gen() throws IOException {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder("MoneyProvider")
-                .superclass(contentProviderClass)
+                .superclass(GlobalSettings.CONTENT_PROVIDER_CLASS)
                 .addModifiers(Modifier.PUBLIC);
 
         genGetType(objectJavaClassBuilder);
@@ -56,14 +46,14 @@ public class ClassJavaProviderGen {
         genUpdate(objectJavaClassBuilder);
         genDelete(objectJavaClassBuilder);
         
-        JavaFile javaFile = JavaFile.builder(GlobalSettings.PACKAGE_NAME + ".provider", objectJavaClassBuilder.build())
+        JavaFile javaFile = JavaFile.builder(GlobalSettings.PROVIDER_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
         javaFile.writeTo(new File(GlobalSettings.OUT_DIR));        
     }
     
     private void genStatic(TypeSpec.Builder classBuilder) {
-        classBuilder.addField(FieldSpec.builder(uriMatcherClass, "uriMatcher", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
-                .initializer("new $T($T.NO_MATCH)", uriMatcherClass, uriMatcherClass)
+        classBuilder.addField(FieldSpec.builder(GlobalSettings.URI_MATCHER_CLASS, "uriMatcher", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
+                .initializer("new $T($T.NO_MATCH)", GlobalSettings.URI_MATCHER_CLASS, GlobalSettings.URI_MATCHER_CLASS)
                 .build());
         int objNumerator=1;
         for(ObjectModel objectModel : dataModel.getObjects()) {
@@ -71,7 +61,11 @@ public class ClassJavaProviderGen {
                     .initializer("$L", Integer.toString(objNumerator++))
                     .build());
         }
-        
+        for(ViewModel viewModel : dataModel.getViewList()) {
+            classBuilder.addField(FieldSpec.builder(int.class, "ID_"+viewModel.getName().toUpperCase(), Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
+                    .initializer("$L", Integer.toString(objNumerator++))
+                    .build());            
+        }
         /*
         for(ObjectModel objectModel : dataModel.getObjects()) {
             classBuilder.addField(FieldSpec.builder(ParameterizedTypeName.get(hashMapClass, ClassName.get(String.class), ClassName.get(String.class)), objectModel.getName()+"ProjectionMap", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
@@ -79,17 +73,39 @@ public class ClassJavaProviderGen {
                     .build());
         }
         */
+
+        for(ViewModel viewModel : dataModel.getViewList()) {
+            classBuilder.addField(FieldSpec.builder(ParameterizedTypeName.get(GlobalSettings.HASH_MAP_CLASS, ClassName.get(String.class), ClassName.get(String.class)), viewModel.getName()+"ProjectionMap", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
+                    .initializer("new $T()", ParameterizedTypeName.get(GlobalSettings.HASH_MAP_CLASS, ClassName.get(String.class), ClassName.get(String.class)))
+                    .build());
+        }
         
         CodeBlock.Builder codeBlock=CodeBlock.builder();
         for(ObjectModel objectModel : dataModel.getObjects()) {
             codeBlock
-                .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", globalSettingsClass, objectModel.getName(), "ID_"+objectModel.getName().toUpperCase());
+                .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", GlobalSettings.GLOBAL_SETTINGS_CLASS, objectModel.getName(), "ID_"+objectModel.getName().toUpperCase());
+        }
+        for(ViewModel viewModel : dataModel.getViewList()) {
+            codeBlock
+                .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", GlobalSettings.GLOBAL_SETTINGS_CLASS, viewModel.getName(), "ID_"+viewModel.getName().toUpperCase());
         }
         
+        for(ViewModel viewModel : dataModel.getViewList()) {
+            String mapName=viewModel.getName()+"ProjectionMap";
+            ClassName metaClass = ClassName.get(GlobalSettings.META_PACKAGE_NAME, viewModel.getName() + "Meta");
+            for(ViewColumn fm : viewModel.getColumns()) {
+                codeBlock.addStatement("$L.put($T.COL_$L, $S + $T.COL_$L)", 
+                        mapName, 
+                        metaClass, ((fm.getName().equals("_id"))?"ID":fm.getName().toUpperCase()),
+                        fm.getExpr()+" AS ",
+                        metaClass, ((fm.getName().equals("_id"))?"ID":fm.getName().toUpperCase())
+                );
+            }            
+        }
         /*
         for(ObjectModel objectModel : dataModel.getObjects()) {
             String mapName=objectModel.getName()+"ProjectionMap";
-            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            ClassName metaClass = ClassName.get(GlobalSettings.META_PACKAGE_NAME, objectModel.getName() + "Meta");
             codeBlock.addStatement("$L.put($T.COL_ID, $T.COL_ID)", mapName, metaClass, metaClass);
             for(FieldModel fieldModel : objectModel.getFields()) {
                 codeBlock.addStatement("$L.put($T.COL_$L, $T.COL_$L)", mapName, metaClass, fieldModel.getName().toUpperCase(), metaClass, fieldModel.getName().toUpperCase());
@@ -105,13 +121,16 @@ public class ClassJavaProviderGen {
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(String.class)
-                    .addParameter(uriClass, "uri")
+                    .addParameter(GlobalSettings.URI_CLASS, "uri")
                 ;
 
         getTypeMethod.addStatement("final int match = uriMatcher.match(uri)");
         getTypeMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
             getTypeMethod.addStatement("case $L: return $S", "ID_"+objectModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+objectModel.getName());
+        }
+        for(ViewModel viewModel : dataModel.getViewList()) {
+            getTypeMethod.addStatement("case $L: return $S", "ID_"+viewModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+viewModel.getName());
         }
         getTypeMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
         getTypeMethod.endControlFlow();
@@ -120,15 +139,15 @@ public class ClassJavaProviderGen {
         
     private void genOnCreate(TypeSpec.Builder classBuilder) {
         classBuilder.addField(
-                FieldSpec.builder(moneyDatabase, "dbOpenHelper", Modifier.PRIVATE)
-                    .addAnnotation(nonNullClass)
+                FieldSpec.builder(GlobalSettings.MONEY_DATABASE_CLASS, "dbOpenHelper", Modifier.PRIVATE)
+                    .addAnnotation(GlobalSettings.NON_NULL_CLASS)
                     .build());
         classBuilder.addMethod(
                 MethodSpec.methodBuilder("onCreate")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(boolean.class)
-                    .addStatement("dbOpenHelper=new $T(getContext())", moneyDatabase)
+                    .addStatement("dbOpenHelper=new $T(getContext())", GlobalSettings.MONEY_DATABASE_CLASS)
                     .addStatement("return true")
                     .build()
         );
@@ -138,26 +157,26 @@ public class ClassJavaProviderGen {
         MethodSpec.Builder insertMethod=MethodSpec.methodBuilder("insert")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(uriClass)
-                    .addParameter(uriClass, "uri")
-                    .addParameter(contentValueClass,"values")
+                    .returns(GlobalSettings.URI_CLASS)
+                    .addParameter(GlobalSettings.URI_CLASS, "uri")
+                    .addParameter(GlobalSettings.CONTENT_VALUE_CLASS,"values")
                 ;
         insertMethod.addStatement("final int match = uriMatcher.match(uri)");
         insertMethod.addStatement("long rowId = -1");
-        insertMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",sqLiteDatabaseClass);
+        insertMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
         insertMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
-            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            ClassName metaClass = ClassName.get(GlobalSettings.META_PACKAGE_NAME, objectModel.getName() + "Meta");
             insertMethod.addStatement("case ID_$L: rowId = database.insertOrThrow($T.TABLE, null, values); break", objectModel.getName().toUpperCase(),metaClass);
         }
         insertMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
         insertMethod.endControlFlow();
         
         insertMethod.beginControlFlow("if(rowId > 0)");
-        insertMethod.addStatement("$T retUri = uri.buildUpon().appendPath(Long.toString(rowId)).build()", uriClass);
+        insertMethod.addStatement("$T retUri = uri.buildUpon().appendPath(Long.toString(rowId)).build()", GlobalSettings.URI_CLASS);
         insertMethod.addStatement("return retUri");
         insertMethod.endControlFlow();
-        insertMethod.addStatement("throw new $T($S + uri)",sqLiteExceptionClass, "Failed to insert row into ");
+        insertMethod.addStatement("throw new $T($S + uri)",GlobalSettings.SQL_EXCEPTION_CLASS, "Failed to insert row into ");
         
         classBuilder.addMethod(insertMethod.build());
     }
@@ -166,24 +185,31 @@ public class ClassJavaProviderGen {
         MethodSpec.Builder queryMethod=MethodSpec.methodBuilder("query")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(cursorClass)
-                    .addParameter(uriClass, "uri")
+                    .returns(GlobalSettings.CURSOR_CLASS)
+                    .addParameter(GlobalSettings.URI_CLASS, "uri")
                     .addParameter(String[].class,"projection")
                     .addParameter(String.class,"selection")
                     .addParameter(String[].class,"selectionArgs")
                     .addParameter(String.class,"sortOrder")
                 ;
-        queryMethod.addStatement("$T database = dbOpenHelper.getReadableDatabase()",sqLiteDatabaseClass);
-        queryMethod.addStatement("$T qb = new $T()", sqLiteBuilderClass, sqLiteBuilderClass);
-        queryMethod.addStatement("$T cursor = null", cursorClass);
+        queryMethod.addStatement("$T database = dbOpenHelper.getReadableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
+        queryMethod.addStatement("$T qb = new $T()", GlobalSettings.SQL_BUILDER_CLASS, GlobalSettings.SQL_BUILDER_CLASS);
+        queryMethod.addStatement("$T cursor = null", GlobalSettings.CURSOR_CLASS);
         queryMethod.addStatement("final int match = uriMatcher.match(uri)");
         queryMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
-            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            ClassName metaClass = ClassName.get(GlobalSettings.META_PACKAGE_NAME, objectModel.getName() + "Meta");
             queryMethod.addStatement("case ID_$L: qb.setTables($T.TABLE)", objectModel.getName().toUpperCase(),metaClass);
             queryMethod.addStatement("cursor = qb.query(database, projection,selection, selectionArgs, null, null, sortOrder)");
             queryMethod.addStatement("break");
         }
+        for(ViewModel viewModel : dataModel.getViewList()) {
+            
+            queryMethod.addStatement("case ID_$L: qb.setTables($T.TABLE)", viewModel.getName().toUpperCase());
+            queryMethod.addStatement("cursor = qb.query(database, projection,selection, selectionArgs, null, null, sortOrder)");
+            queryMethod.addStatement("break");
+        }
+
         queryMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
         queryMethod.endControlFlow();
         
@@ -198,18 +224,18 @@ public class ClassJavaProviderGen {
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(int.class)
-                    .addParameter(uriClass, "uri")
-                    .addParameter(contentValueClass,"values")
+                    .addParameter(GlobalSettings.URI_CLASS, "uri")
+                    .addParameter(GlobalSettings.CONTENT_VALUE_CLASS,"values")
                     .addParameter(String.class,"selection")
                     .addParameter(String[].class,"selectionArgs")
                 ;
 
         updateMethod.addStatement("final int match = uriMatcher.match(uri)");
         updateMethod.addStatement("int count = 0");
-        updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",sqLiteDatabaseClass);
+        updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
         updateMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
-            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            ClassName metaClass = ClassName.get(GlobalSettings.META_PACKAGE_NAME, objectModel.getName() + "Meta");
             updateMethod.addStatement("case ID_$L: count = database.update($T.TABLE, values, selection, selectionArgs); break", objectModel.getName().toUpperCase(),metaClass);
         }
         updateMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
@@ -224,17 +250,17 @@ public class ClassJavaProviderGen {
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(int.class)
-                    .addParameter(uriClass, "uri")
+                    .addParameter(GlobalSettings.URI_CLASS, "uri")
                     .addParameter(String.class,"selection")
                     .addParameter(String[].class,"selectionArgs")
                 ;
 
         updateMethod.addStatement("final int match = uriMatcher.match(uri)");
         updateMethod.addStatement("int count = 0");
-        updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",sqLiteDatabaseClass);
+        updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
         updateMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
-            ClassName metaClass = ClassName.get(GlobalSettings.PACKAGE_NAME + ".meta", objectModel.getName() + "Meta");
+            ClassName metaClass = ClassName.get(GlobalSettings.META_PACKAGE_NAME, objectModel.getName() + "Meta");
             updateMethod.addStatement("case ID_$L: count = database.delete($T.TABLE, selection, selectionArgs); break", objectModel.getName().toUpperCase(),metaClass);
         }
         updateMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
