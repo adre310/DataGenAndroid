@@ -57,7 +57,7 @@
         <column name="CategoryGuid" expr="c.r_guid"  type="String" />
         <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" type="int" />
         <column name="IsSystem" expr="p.is_system"  type="boolean" />
-        <join join="eft outer join accounts a on p.account_id=a._id" />
+        <join join="left outer join accounts a on p.account_id=a._id" />
         <join join="left outer join categories c on p.category_id=c._id" />
     </view>
     <view name="AccountList"  table="accounts a" groupBy="a._id">

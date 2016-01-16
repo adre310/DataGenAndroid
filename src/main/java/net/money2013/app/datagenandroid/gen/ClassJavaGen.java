@@ -99,6 +99,11 @@ public class ClassJavaGen {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.interfaceBuilder(viewModel.getName() + "Meta")
                 .addModifiers(Modifier.PUBLIC);
 
+        FieldSpec uriSpec = FieldSpec.builder(String.class, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+                .initializer("$S + $T.CONTENT_AUTHORITY + $S", "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + viewModel.getName())
+                .build();
+        objectJavaClassBuilder.addField(uriSpec);
+        
         for (ViewColumn fm : viewModel.getColumns()) {
             FieldSpec fieldSpec = FieldSpec.builder(String.class, "COL_" +((fm.getName().equals("_id"))?"ID":fm.getName().toUpperCase()), Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
                     .initializer("$S", fm.getName())

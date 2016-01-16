@@ -20,6 +20,7 @@ import net.money2013.app.datagenandroid.model.DataModel;
 import net.money2013.app.datagenandroid.model.FieldModel;
 import net.money2013.app.datagenandroid.model.ObjectModel;
 import net.money2013.app.datagenandroid.model.ViewColumn;
+import net.money2013.app.datagenandroid.model.ViewJoin;
 import net.money2013.app.datagenandroid.model.ViewModel;
 
 /**
@@ -204,9 +205,17 @@ public class ClassJavaProviderGen {
             queryMethod.addStatement("break");
         }
         for(ViewModel viewModel : dataModel.getViewList()) {
-            
-            queryMethod.addStatement("case ID_$L: qb.setTables($T.TABLE)", viewModel.getName().toUpperCase());
-            queryMethod.addStatement("cursor = qb.query(database, projection,selection, selectionArgs, null, null, sortOrder)");
+            String table=viewModel.getTable();
+            for(ViewJoin join : viewModel.getJoins()) {
+                table+=" "+join.getJoin();
+            }
+            queryMethod.addStatement("case ID_$L: qb.setTables($S)", viewModel.getName().toUpperCase(),table);
+            queryMethod.addStatement("qb.setProjectionMap($LProjectionMap)",viewModel.getName());
+            if(viewModel.getGroupBy()==null)
+                queryMethod.addStatement("cursor = qb.query(database, projection,selection, selectionArgs, null, null, sortOrder)");
+            else
+                queryMethod.addStatement("cursor = qb.query(database, projection,selection, selectionArgs, $S, null, sortOrder)",viewModel.getGroupBy());
+                
             queryMethod.addStatement("break");
         }
 
