@@ -61,12 +61,12 @@ public class ClassJavaGen {
 
         objectJavaClassBuilder.addField(tableSpec);
 
-        /*
-        FieldSpec uriSpec = FieldSpec.builder(uriClass, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", uriClass, "content://", globalSettingsClass, "/" + objectModel.getName())
+        
+        FieldSpec uriSpec = FieldSpec.builder(String.class, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+                .initializer("$S + $T.CONTENT_AUTHORITY + $S", "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getName())
                 .build();
         objectJavaClassBuilder.addField(uriSpec);
-         */
+         
         List<String> fieldList = new ArrayList<>();
         fieldList.add("_id INTEGER PRIMARY KEY AUTOINCREMENT");
         FieldSpec fieldSpecId = FieldSpec.builder(String.class, "COL_ID", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
