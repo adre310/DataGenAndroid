@@ -15,6 +15,7 @@ import java.io.File;
 import javax.lang.model.element.Modifier;
 import net.money2013.app.datagenandroid.gen.ClassJavaGen;
 import net.money2013.app.datagenandroid.gen.ClassJavaProviderGen;
+import net.money2013.app.datagenandroid.gen.GenStrings;
 import net.money2013.app.datagenandroid.model.DataModel;
 import net.money2013.app.datagenandroid.model.FieldModel;
 import net.money2013.app.datagenandroid.model.ObjectModel;
@@ -31,6 +32,8 @@ public class AppMain {
         Serializer serializer = new Persister();
         try {
             DataModel dm=serializer.read(DataModel.class, new File(AppMain.class.getClassLoader().getResource("model/datamodel.xml").getFile()));
+            GenStrings genStrings=new GenStrings(dm);
+            genStrings.gen();
             ClassJavaGen gen=new ClassJavaGen(dm);
             gen.gen();
             ClassJavaProviderGen genProvider=new ClassJavaProviderGen(dm);
