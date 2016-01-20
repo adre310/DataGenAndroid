@@ -25,17 +25,34 @@ public class Utils {
             if(sType.equals("String"))
                 return String.class;
             if(sType.equals("int"))
-		return Integer.class;
+		return int.class;
             if(sType.equals("double"))
-		return Double.class;
+		return double.class;
             if(sType.equals("Date"))
 		return Date.class;
             if(sType.equals("boolean"))
-		return Boolean.class;
+		return boolean.class;
             if(sType.equals("long"))
-		return Long.class;
+		return long.class;
             else
 		return String.class;            
+        }
+
+        public static String getPrefixByName(String sType) {
+            if(sType.equals("String"))
+                return "String";
+            if(sType.equals("int"))
+		return "Integer";
+            if(sType.equals("double"))
+		return "Double";
+            if(sType.equals("Date"))
+		return "Date";
+            if(sType.equals("boolean"))
+		return "Boolean";
+            if(sType.equals("long"))
+		return "Long";
+            else
+		return "String";            
         }
         
 }

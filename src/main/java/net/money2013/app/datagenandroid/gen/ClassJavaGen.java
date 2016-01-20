@@ -62,8 +62,8 @@ public class ClassJavaGen {
         objectJavaClassBuilder.addField(tableSpec);
 
         
-        FieldSpec uriSpec = FieldSpec.builder(String.class, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .initializer("$S + $T.CONTENT_AUTHORITY + $S", "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getName())
+        FieldSpec uriSpec = FieldSpec.builder(GlobalSettings.URI_CLASS, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", GlobalSettings.URI_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getName())
                 .build();
         objectJavaClassBuilder.addField(uriSpec);
          
@@ -99,8 +99,8 @@ public class ClassJavaGen {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.interfaceBuilder(viewModel.getName() + "Meta")
                 .addModifiers(Modifier.PUBLIC);
 
-        FieldSpec uriSpec = FieldSpec.builder(String.class, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .initializer("$S + $T.CONTENT_AUTHORITY + $S", "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + viewModel.getName())
+        FieldSpec uriSpec = FieldSpec.builder(GlobalSettings.URI_CLASS, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
+                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", GlobalSettings.URI_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + viewModel.getName())
                 .build();
         objectJavaClassBuilder.addField(uriSpec);
         
@@ -131,12 +131,12 @@ public class ClassJavaGen {
                 .build()
         );
 
-        objectJavaClassBuilder.addField(FieldSpec.builder(Long.class, "mId", Modifier.PRIVATE)
+        objectJavaClassBuilder.addField(FieldSpec.builder(long.class, "mId", Modifier.PRIVATE)
                 .build());
 
         MethodSpec getFieldId = MethodSpec.methodBuilder("getId")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(Long.class)
+                .returns(long.class)
                 .addStatement("return this.mId")
                 .build();
         objectJavaClassBuilder.addMethod(getFieldId);
@@ -144,7 +144,7 @@ public class ClassJavaGen {
         MethodSpec setFieldId = MethodSpec.methodBuilder("setId")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME, objectModel.getName()))
-                .addParameter(Long.class, "pId")
+                .addParameter(long.class, "pId")
                 .addStatement("this.mId=pId")
                 .addStatement("return this")
                 .build();
@@ -232,7 +232,7 @@ public class ClassJavaGen {
                 .addStatement("object.setId($T.CursorToLong(cursor,cursor.getColumnIndex($T.COL_ID)))", GlobalSettings.BLL_CONVERTER_CLASS, metaClass);
 
         for (FieldModel fieldModel : objectModel.getFields()) {
-            mapGet.addStatement("object.set$L($T.CursorTo$L(cursor,cursor.getColumnIndex($T.COL_$L)))", fieldModel.getName(), GlobalSettings.BLL_CONVERTER_CLASS, Utils.getTypeByName(fieldModel.getType()).getSimpleName(), metaClass, fieldModel.getName().toUpperCase());
+            mapGet.addStatement("object.set$L($T.CursorTo$L(cursor,cursor.getColumnIndex($T.COL_$L)))", fieldModel.getName(), GlobalSettings.BLL_CONVERTER_CLASS, Utils.getPrefixByName(fieldModel.getType()), metaClass, fieldModel.getName().toUpperCase());
         }
         mapGet
                 .addStatement("return object");
@@ -261,7 +261,7 @@ public class ClassJavaGen {
                 .addStatement("$T object=new $T()", modelClass, modelClass);
 
         for (ViewColumn fm : viewModel.getColumns()) {
-            mapGet.addStatement("object.set$L($T.CursorTo$L(cursor,cursor.getColumnIndex($T.COL_$L)))", ((fm.getName().equals("_id"))?"Id":fm.getName()), GlobalSettings.BLL_CONVERTER_CLASS, Utils.getTypeByName(fm.getType()).getSimpleName(), metaClass, ((fm.getName().equals("_id"))?"ID":fm.getName().toUpperCase()));
+            mapGet.addStatement("object.set$L($T.CursorTo$L(cursor,cursor.getColumnIndex($T.COL_$L)))", ((fm.getName().equals("_id"))?"Id":fm.getName()), GlobalSettings.BLL_CONVERTER_CLASS, Utils.getPrefixByName(fm.getType()), metaClass, ((fm.getName().equals("_id"))?"ID":fm.getName().toUpperCase()));
         }
         mapGet
                 .addStatement("return object");
@@ -285,7 +285,7 @@ public class ClassJavaGen {
                 .addAnnotation(Override.class)
                 .addAnnotation(GlobalSettings.NON_NULL_CLASS)
                 .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(GlobalSettings.NON_NULL_CLASS).build())
-                .addStatement("return $T.builder().uri($S + $T.CONTENT_AUTHORITY + $S).build()", GlobalSettings.INSERT_QUERY_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getName());
+                .addStatement("return $T.builder().uri($T.CONTENT_URI).build()", GlobalSettings.INSERT_QUERY_CLASS, metaClass);
 
         objectJavaClassBuilder.addMethod(mapToInsertQuery.build());
 
@@ -295,7 +295,7 @@ public class ClassJavaGen {
                 .addAnnotation(Override.class)
                 .addAnnotation(GlobalSettings.NON_NULL_CLASS)
                 .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(GlobalSettings.NON_NULL_CLASS).build())
-                .addStatement("return $T.builder().uri($S + $T.CONTENT_AUTHORITY + $S).where($S).whereArgs($T.toString(object.getId())).build()", GlobalSettings.UPDATE_QUERY_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getName(), "_id = ?", Long.class);
+                .addStatement("return $T.builder().uri($T.CONTENT_URI).where($S).whereArgs($T.toString(object.getId())).build()", GlobalSettings.DELETE_QUERY_CLASS, metaClass, "_id = ?", Long.class);
 
         objectJavaClassBuilder.addMethod(mapToUpdateQuery.build());
 
@@ -339,7 +339,7 @@ public class ClassJavaGen {
                 .addAnnotation(Override.class)
                 .addAnnotation(GlobalSettings.NON_NULL_CLASS)
                 .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(GlobalSettings.NON_NULL_CLASS).build())
-                .addStatement("return $T.builder().uri($S + $T.CONTENT_AUTHORITY + $S).where($S).whereArgs($T.toString(object.getId())).build()", GlobalSettings.DELETE_QUERY_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getName(), "_id = ?", Long.class);
+                .addStatement("return $T.builder().uri($T.CONTENT_URI).where($S).whereArgs($T.toString(object.getId())).build()", GlobalSettings.DELETE_QUERY_CLASS, metaClass, "_id = ?", Long.class);
 
         objectJavaClassBuilder.addMethod(mapToDeleteQuery.build());
 
