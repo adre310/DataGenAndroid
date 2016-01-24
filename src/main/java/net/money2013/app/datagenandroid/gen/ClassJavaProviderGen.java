@@ -39,6 +39,15 @@ public class ClassJavaProviderGen {
                 .superclass(GlobalSettings.CONTENT_PROVIDER_CLASS)
                 .addModifiers(Modifier.PUBLIC);
 
+        objectJavaClassBuilder.addField(
+                FieldSpec.builder(GlobalSettings.SQL_HELPER_CLASS, "dbOpenHelper")
+                    .addAnnotation(GlobalSettings.INJECT_CLASS)
+                    .build());
+        objectJavaClassBuilder.addField(
+                FieldSpec.builder(ClassName.get(GlobalSettings.PROVIDER_PACKAGE_NAME,"MoneyProvider"), "instance", Modifier.PUBLIC, Modifier.STATIC)
+                    .initializer("null")
+                    .build());
+        
         genGetType(objectJavaClassBuilder);
         genStatic(objectJavaClassBuilder);
         genOnCreate(objectJavaClassBuilder);
@@ -132,14 +141,6 @@ public class ClassJavaProviderGen {
     }
         
     private void genOnCreate(TypeSpec.Builder classBuilder) {
-        classBuilder.addField(
-                FieldSpec.builder(GlobalSettings.SQL_HELPER_CLASS, "dbOpenHelper", Modifier.PRIVATE)
-                    .addAnnotation(GlobalSettings.INJECT_CLASS)
-                    .build());
-        classBuilder.addField(
-                FieldSpec.builder(ClassName.get(GlobalSettings.PROVIDER_PACKAGE_NAME,"MoneyProvider"), "instance", Modifier.PUBLIC, Modifier.STATIC)
-                    .initializer("null")
-                    .build());
         classBuilder.addMethod(
                 MethodSpec.methodBuilder("onCreate")
                     .addAnnotation(Override.class)
