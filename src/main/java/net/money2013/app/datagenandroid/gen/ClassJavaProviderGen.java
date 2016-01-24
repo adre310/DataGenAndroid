@@ -67,13 +67,6 @@ public class ClassJavaProviderGen {
                     .initializer("$L", Integer.toString(objNumerator++))
                     .build());            
         }
-        /*
-        for(ObjectModel objectModel : dataModel.getObjects()) {
-            classBuilder.addField(FieldSpec.builder(ParameterizedTypeName.get(hashMapClass, ClassName.get(String.class), ClassName.get(String.class)), objectModel.getName()+"ProjectionMap", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
-                    .initializer("new $T()", ParameterizedTypeName.get(hashMapClass, ClassName.get(String.class), ClassName.get(String.class)))
-                    .build());
-        }
-        */
 
         for(ViewModel viewModel : dataModel.getViewList()) {
             classBuilder.addField(FieldSpec.builder(ParameterizedTypeName.get(GlobalSettings.HASH_MAP_CLASS, ClassName.get(String.class), ClassName.get(String.class)), viewModel.getName()+"ProjectionMap", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
@@ -84,11 +77,11 @@ public class ClassJavaProviderGen {
         CodeBlock.Builder codeBlock=CodeBlock.builder();
         for(ObjectModel objectModel : dataModel.getObjects()) {
             codeBlock
-                .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", GlobalSettings.GLOBAL_SETTINGS_CLASS, objectModel.getName(), "ID_"+objectModel.getName().toUpperCase());
+                .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", GlobalSettings.GLOBAL_SETTINGS_CLASS,objectModel.getUri(), "ID_"+objectModel.getName().toUpperCase());
         }
         for(ViewModel viewModel : dataModel.getViewList()) {
             codeBlock
-                .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", GlobalSettings.GLOBAL_SETTINGS_CLASS, viewModel.getName(), "ID_"+viewModel.getName().toUpperCase());
+                .addStatement("uriMatcher.addURI($T.CONTENT_AUTHORITY, $S, $L)", GlobalSettings.GLOBAL_SETTINGS_CLASS, viewModel.getUri(), "ID_"+viewModel.getName().toUpperCase());
         }
         
         for(ViewModel viewModel : dataModel.getViewList()) {
@@ -140,15 +133,19 @@ public class ClassJavaProviderGen {
         
     private void genOnCreate(TypeSpec.Builder classBuilder) {
         classBuilder.addField(
-                FieldSpec.builder(GlobalSettings.MONEY_DATABASE_CLASS, "dbOpenHelper", Modifier.PRIVATE)
-                    .addAnnotation(GlobalSettings.NON_NULL_CLASS)
+                FieldSpec.builder(GlobalSettings.SQL_HELPER_CLASS, "dbOpenHelper", Modifier.PRIVATE)
+                    .addAnnotation(GlobalSettings.INJECT_CLASS)
+                    .build());
+        classBuilder.addField(
+                FieldSpec.builder(ClassName.get(GlobalSettings.PROVIDER_PACKAGE_NAME,"MoneyProvider"), "instance", Modifier.PUBLIC, Modifier.STATIC)
+                    .initializer("null")
                     .build());
         classBuilder.addMethod(
                 MethodSpec.methodBuilder("onCreate")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(boolean.class)
-                    .addStatement("dbOpenHelper=new $T(getContext())", GlobalSettings.MONEY_DATABASE_CLASS)
+                    .addStatement("instance=this")
                     .addStatement("return true")
                     .build()
         );

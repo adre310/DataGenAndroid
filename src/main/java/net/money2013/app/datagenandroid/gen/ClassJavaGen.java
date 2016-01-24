@@ -63,7 +63,7 @@ public class ClassJavaGen {
 
         
         FieldSpec uriSpec = FieldSpec.builder(GlobalSettings.URI_CLASS, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", GlobalSettings.URI_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getName())
+                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", GlobalSettings.URI_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + objectModel.getUri())
                 .build();
         objectJavaClassBuilder.addField(uriSpec);
          
@@ -100,7 +100,7 @@ public class ClassJavaGen {
                 .addModifiers(Modifier.PUBLIC);
 
         FieldSpec uriSpec = FieldSpec.builder(GlobalSettings.URI_CLASS, "CONTENT_URI", Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC)
-                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", GlobalSettings.URI_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + viewModel.getName())
+                .initializer("$T.parse($S + $T.CONTENT_AUTHORITY + $S)", GlobalSettings.URI_CLASS, "content://", GlobalSettings.GLOBAL_SETTINGS_CLASS, "/" + viewModel.getUri())
                 .build();
         objectJavaClassBuilder.addField(uriSpec);
         

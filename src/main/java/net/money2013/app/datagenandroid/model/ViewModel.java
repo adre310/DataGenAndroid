@@ -20,6 +20,9 @@ public class ViewModel {
     @Attribute(name = "groupBy", required = false)
     private String msGroup = null;
 
+    @Attribute(name="uri", required = true)
+    private String msUri;
+        
     @ElementList(inline = true)
     private List<ViewColumn> mColumns = null;
 
@@ -56,4 +59,12 @@ public class ViewModel {
         return mJoins;
     }
 
+    public String getUri() {
+        return msUri;
+    }
+
+    public void setUri(String msUri) {
+        this.msUri = msUri;
+    }
+   
 }
