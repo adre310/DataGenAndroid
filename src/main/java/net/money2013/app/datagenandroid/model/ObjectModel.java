@@ -16,6 +16,9 @@ public class ObjectModel {
     @Attribute(name = "name", required = true)
     private String msName;
 
+    @Attribute(name="uri", required = true)
+    private String msUri;
+    
     @Attribute(name = "table", required = true)
     private String msTable;
 
@@ -44,4 +47,13 @@ public class ObjectModel {
         return mFields;
     }
 
+    public String getUri() {
+        return msUri;
+    }
+
+    public void setUri(String msUri) {
+        this.msUri = msUri;
+    }
+
+    
 }

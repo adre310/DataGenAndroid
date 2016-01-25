@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <model  xmlns="http://money2013.net/datagenerator/2013/07/27">
-    <version>11</version>
-    <object name="Pay" table="pays">
-        <version>11</version>
+    <object name="Pay" table="pays" uri="pay">
         <field name="Guid" column="r_guid" type="String" />
         <field name="Modified" column="modified" type="boolean" />
         <field name="Deleted" column="deleted" type="boolean" />
@@ -16,8 +14,7 @@
         <field name="Category" column="category_id" type="long" />
         <field name="IsSystem" column="is_system" type="boolean" />        
     </object>
-    <object name="Account" table="accounts">
-        <version>11</version>
+    <object name="Account" table="accounts" uri="account">
         <field name="Guid" column="r_guid" type="String" />
         <field name="Modified" column="modified" type="boolean" />
         <field name="Deleted" column="deleted" type="boolean" />
@@ -25,8 +22,7 @@
         <field name="Name" column="name" type="String" />
         <field name="Currency" column="currency" type="String" />
     </object>
-    <object name="Category" table="categories">
-        <version>11</version>
+    <object name="Category" table="categories" uri="category">
         <field name="Guid" column="r_guid" type="String" />
         <field name="Modified" column="modified" type="boolean" />
         <field name="Deleted" column="deleted" type="boolean" />
@@ -35,15 +31,11 @@
         <field name="IsDefault" column="is_default" type="boolean" />
         <field name="Theme" column="theme_id" type="int" />
     </object>
-    <object name="CurrencyCode" table="currency_code">
-        <field name="Code" column="code" type="String" />
-        <field name="Notes" column="notes" type="String" />
-    </object>
-    <object name="ApplicationSettings" table="app_settings">
+    <object name="ApplicationSettings" table="app_settings" uri="settings">
         <field name="Name" column="key_name" type="String" />
         <field name="Value" column="key_value" type="String" />
     </object>
-    <view name="PayList"  table="pays p">
+    <view name="PayList"  table="pays p" uri="pay/list">
         <column name="_id" expr="p._id"  type="long" />
         <column name="Guid" expr="p.r_guid"  type="String" />
         <column name="Deleted" expr="p.deleted"  type="boolean" />
@@ -60,7 +52,7 @@
         <join join="left outer join accounts a on p.account_id=a._id" />
         <join join="left outer join categories c on p.category_id=c._id" />
     </view>
-    <view name="AccountList"  table="accounts a" groupBy="a._id">
+    <view name="AccountList"  table="accounts a" groupBy="a._id" uri="account/list">
         <column name="_id" expr="a._id"  type="long" />
         <column name="Notes" expr="a.notes"   type="String"/>
         <column name="Name" expr="a.name"   type="String"/>
@@ -68,7 +60,7 @@
         <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" type="double"/>
         <join join="left outer join pays p on p.account_id=a._id AND p.deleted=0" />
     </view>
-    <view name="ReportByCategory" table="categories c" groupBy="c.name,a.currency">
+    <view name="ReportByCategory" table="categories c" groupBy="c.name,a.currency" uri="pay/report_by_category">
         <column name="_id" expr="c.name"  type="String" />
         <column name="Category" expr="c.name"  type="String" />
         <column name="Currency" expr="a.currency"  type="String" />
@@ -76,13 +68,13 @@
         <join join="inner join pays p on p.category_id=c._id AND p.deleted=0" />
         <join join="inner join accounts a on a._id=p.account_id AND a.deleted=0" />
     </view>
-    <view name="ReportByCurrency" table="pays p" groupBy="a.currency">
+    <view name="ReportByCurrency" table="pays p" groupBy="a.currency" uri="pay/report_by_currency">
         <column name="_id" expr="a.currency"  type="String" />
         <column name="Currency" expr="a.currency" type="String"/>
         <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" type="double" />
         <join join="inner join accounts a on a._id=p.account_id AND a.deleted=0" />
     </view>
-    <view name="ReportByMonth" table="pays p" groupBy="a.currency,p.pay_year,p.pay_month">
+    <view name="ReportByMonth" table="pays p" groupBy="a.currency,p.pay_year,p.pay_month" uri="pay/report_by_month">
         <column name="_id" expr="p.pay_year*100+p.pay_month"  type="long" />
         <column name="Currency" expr="a.currency" type="String"/>
         <column name="Year" expr="p.pay_year" type="int"/>
