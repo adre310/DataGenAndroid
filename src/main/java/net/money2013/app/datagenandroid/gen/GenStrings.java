@@ -5,7 +5,6 @@
  */
 package net.money2013.app.datagenandroid.gen;
 
-import iae.home.datagenerator.datamodel.ResStrings;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -13,6 +12,7 @@ import net.money2013.app.datagenandroid.GlobalSettings;
 import net.money2013.app.datagenandroid.model.DataModel;
 import net.money2013.app.datagenandroid.model.FieldModel;
 import net.money2013.app.datagenandroid.model.ObjectModel;
+import net.money2013.app.datagenandroid.model.ResStrings;
 import net.money2013.app.datagenandroid.model.ViewColumn;
 import net.money2013.app.datagenandroid.model.ViewModel;
 import org.simpleframework.xml.Serializer;

@@ -5,12 +5,15 @@
  */
 package net.money2013.app.datagenandroid.gen;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.File;
 import java.io.IOException;
@@ -120,8 +123,14 @@ public class ClassJavaGen {
 
     private void GenModelClass(ObjectModel objectModel) throws IOException {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder(objectModel.getName())
+                .addSuperinterface(GlobalSettings.PARCELABLE_CLASS)
                 .addModifiers(Modifier.PUBLIC);
 
+        MethodSpec constrDefault=MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .build();
+        objectJavaClassBuilder.addMethod(constrDefault);
+        
         objectJavaClassBuilder.addField(
                 FieldSpec.builder(
                     ParameterizedTypeName.get(GlobalSettings.BEFORE_UPDATE_CLASS, ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName())),
@@ -173,6 +182,63 @@ public class ClassJavaGen {
             objectJavaClassBuilder.addMethod(setField);
         }
 
+        MethodSpec.Builder constrParcel=MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(GlobalSettings.PARCEL_CLASS,"in")
+                ;
+
+        for (FieldModel fieldModel : objectModel.getFields()) {
+            constrParcel.addStatement("m$L=$T.ParcelTo$L(in)", fieldModel.getName(), GlobalSettings.BLL_CONVERTER_CLASS, Utils.getPrefixByName(fieldModel.getType()));
+        }
+
+        objectJavaClassBuilder.addMethod(constrParcel.build());
+
+        MethodSpec.Builder writeParcel=MethodSpec.methodBuilder("writeToParcel")
+                .addAnnotation(Override.class)
+                .addParameter(GlobalSettings.PARCEL_CLASS, "out")
+                .addParameter(int.class,"flag")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.VOID);
+
+        for (FieldModel fieldModel : objectModel.getFields()) {
+            writeParcel.addStatement("$T.ObjectToParcel(out,m$L)", GlobalSettings.BLL_CONVERTER_CLASS, fieldModel.getName());
+        }
+        
+        objectJavaClassBuilder.addMethod(writeParcel.build());
+        
+        MethodSpec describeParcel=MethodSpec.methodBuilder("describeContents")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(int.class)
+                .addStatement("return 0")
+                .build();
+        objectJavaClassBuilder.addMethod(describeParcel);
+
+        TypeSpec parcelCreatorClass=TypeSpec.anonymousClassBuilder("")
+                    .addSuperinterface(ParameterizedTypeName.get(GlobalSettings.PARCELABLE_CREATOR_CLASS,ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName())))
+                        .addMethod(MethodSpec.methodBuilder("createFromParcel")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(GlobalSettings.PARCEL_CLASS,"in")
+                                .returns(ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName()))
+                                .addStatement("return new $T(in)", ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName()))
+                                .build())
+                        .addMethod(MethodSpec.methodBuilder("newArray")
+                                .addAnnotation(Override.class)
+                                .returns(ArrayTypeName.of(ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName())))
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(int.class,"size")
+                                .addStatement("return new $T[size]", ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName()))
+                                .build())
+                    .build();
+        
+        FieldSpec parcelCreator=FieldSpec.builder(
+                ParameterizedTypeName.get(GlobalSettings.PARCELABLE_CREATOR_CLASS,ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName())), "CREATOR", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$L", parcelCreatorClass )
+                .build();
+                
+        objectJavaClassBuilder.addField(parcelCreator);
+        
         JavaFile javaFile = JavaFile.builder(GlobalSettings.MODEL_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
 

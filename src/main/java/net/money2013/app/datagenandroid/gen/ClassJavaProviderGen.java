@@ -147,6 +147,7 @@ public class ClassJavaProviderGen {
                     .addModifiers(Modifier.PUBLIC)
                     .returns(boolean.class)
                     .addStatement("instance=this")
+                    .addStatement("(($T)(getContext().getApplicationContext())).appComponent().inject(this)", GlobalSettings.APP_MAIN_CLASS)
                     .addStatement("return true")
                     .build()
         );

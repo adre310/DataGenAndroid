@@ -1,4 +1,4 @@
-package iae.home.datagenerator.datamodel;
+package net.money2013.app.datagenandroid.model;
 
 import java.util.HashMap;
 import java.util.Map;

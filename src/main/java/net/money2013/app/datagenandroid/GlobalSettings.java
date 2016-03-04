@@ -20,6 +20,7 @@ public interface GlobalSettings {
     public static final String PROVIDER_PACKAGE_NAME=PACKAGE_NAME+".persist";
     public static final String OUT_DIR="c:/tmp";
  
+    public static final ClassName APP_MAIN_CLASS = ClassName.get(GlobalSettings.PACKAGE_NAME, "AppMain");
     public static final ClassName GLOBAL_SETTINGS_CLASS = ClassName.get(GlobalSettings.PACKAGE_NAME, "GlobalSettings");
     public static final ClassName CONTENT_PROVIDER_CLASS = ClassName.get("android.content", "ContentProvider");
     public static final ClassName CONTENT_VALUE_CLASS = ClassName.get("android.content","ContentValues");
@@ -43,4 +44,7 @@ public interface GlobalSettings {
     public static final ClassName BLL_CONVERTER_CLASS = ClassName.get(PERSIST_PACKAGE_NAME+".util", "BLLConverter");    
     public static final ClassName BEFORE_UPDATE_CLASS = ClassName.get(PERSIST_PACKAGE_NAME+".util", "OnBeforeUpdate");
     public static final ClassName INJECT_CLASS=ClassName.get("javax.inject","Inject");
+    public static final ClassName PARCELABLE_CLASS=ClassName.get("android.os","Parcelable");
+    public static final ClassName PARCELABLE_CREATOR_CLASS=ClassName.get("android.os.Parcelable","Creator");
+    public static final ClassName PARCEL_CLASS=ClassName.get("android.os","Parcel");
 }
