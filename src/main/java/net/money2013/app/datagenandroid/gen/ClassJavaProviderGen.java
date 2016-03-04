@@ -58,7 +58,7 @@ public class ClassJavaProviderGen {
         
         JavaFile javaFile = JavaFile.builder(GlobalSettings.PROVIDER_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));        
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));        
     }
     
     private void genStatic(TypeSpec.Builder classBuilder) {

@@ -16,6 +16,7 @@ import javax.lang.model.element.Modifier;
 import net.money2013.app.datagenandroid.gen.ClassJavaGen;
 import net.money2013.app.datagenandroid.gen.ClassJavaProviderGen;
 import net.money2013.app.datagenandroid.gen.GenStrings;
+import net.money2013.app.datagenandroid.gen.TestGen;
 import net.money2013.app.datagenandroid.model.DataModel;
 import net.money2013.app.datagenandroid.model.FieldModel;
 import net.money2013.app.datagenandroid.model.ObjectModel;
@@ -38,6 +39,8 @@ public class AppMain {
             gen.gen();
             ClassJavaProviderGen genProvider=new ClassJavaProviderGen(dm);
             genProvider.gen();
+            TestGen testGen=new TestGen(dm);
+            testGen.gen();
         } catch(Exception e) {
             System.err.println("Exception: "+e.getLocalizedMessage());
             e.printStackTrace(System.err);

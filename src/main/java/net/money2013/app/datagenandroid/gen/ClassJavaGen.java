@@ -95,7 +95,7 @@ public class ClassJavaGen {
         JavaFile javaFile = JavaFile.builder(GlobalSettings.META_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
 
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
 
     private void GenViewMetaClass(ViewModel viewModel) throws IOException {
@@ -118,7 +118,7 @@ public class ClassJavaGen {
         JavaFile javaFile = JavaFile.builder(GlobalSettings.META_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
 
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
 
     private void GenModelClass(ObjectModel objectModel) throws IOException {
@@ -242,7 +242,7 @@ public class ClassJavaGen {
         JavaFile javaFile = JavaFile.builder(GlobalSettings.MODEL_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
 
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
 
     private void GenViewModelClass(ViewModel viewModel) throws IOException {
@@ -275,7 +275,7 @@ public class ClassJavaGen {
         JavaFile javaFile = JavaFile.builder(GlobalSettings.MODEL_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
 
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
     
     private void GenGetResolver(ObjectModel objectModel) throws IOException {
@@ -305,7 +305,7 @@ public class ClassJavaGen {
 
         objectJavaClassBuilder.addMethod(mapGet.build());
         JavaFile javaFile = JavaFile.builder(GlobalSettings.RESOLVER_PACKAGE_NAME, objectJavaClassBuilder.build()).build();
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
 
     private void GenViewGetResolver(ViewModel viewModel) throws IOException {
@@ -334,7 +334,7 @@ public class ClassJavaGen {
 
         objectJavaClassBuilder.addMethod(mapGet.build());
         JavaFile javaFile = JavaFile.builder(GlobalSettings.RESOLVER_PACKAGE_NAME, objectJavaClassBuilder.build()).build();
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
     
     private void GenPutResolver(ObjectModel objectModel) throws IOException {
@@ -388,7 +388,7 @@ public class ClassJavaGen {
         objectJavaClassBuilder.addMethod(mapToContentValues.build());
 
         JavaFile javaFile = JavaFile.builder(GlobalSettings.RESOLVER_PACKAGE_NAME, objectJavaClassBuilder.build()).build();
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
 
     private void GenDeleteResolver(ObjectModel objectModel) throws IOException {
@@ -410,7 +410,7 @@ public class ClassJavaGen {
         objectJavaClassBuilder.addMethod(mapToDeleteQuery.build());
 
         JavaFile javaFile = JavaFile.builder(GlobalSettings.RESOLVER_PACKAGE_NAME, objectJavaClassBuilder.build()).build();
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
 
     private void GenResolver(ObjectModel objectModel) throws IOException {
@@ -433,6 +433,6 @@ public class ClassJavaGen {
                 .build();
         objectJavaClassBuilder.addMethod(constr);
         JavaFile javaFile = JavaFile.builder(GlobalSettings.RESOLVER_PACKAGE_NAME, objectJavaClassBuilder.build()).build();
-        javaFile.writeTo(new File(GlobalSettings.OUT_DIR));
+        javaFile.writeTo(new File(GlobalSettings.MAIN_OUT_DIR));
     }
 }

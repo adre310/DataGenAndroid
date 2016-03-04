@@ -19,6 +19,8 @@ public interface GlobalSettings {
     public static final String RESOLVER_PACKAGE_NAME=PACKAGE_NAME+".persist.resolver";
     public static final String PROVIDER_PACKAGE_NAME=PACKAGE_NAME+".persist";
     public static final String OUT_DIR="c:/tmp";
+    public static final String MAIN_OUT_DIR="c:/tmp/main";
+    public static final String TEST_OUT_DIR="c:/tmp/androidTest";
  
     public static final ClassName APP_MAIN_CLASS = ClassName.get(GlobalSettings.PACKAGE_NAME, "AppMain");
     public static final ClassName GLOBAL_SETTINGS_CLASS = ClassName.get(GlobalSettings.PACKAGE_NAME, "GlobalSettings");
