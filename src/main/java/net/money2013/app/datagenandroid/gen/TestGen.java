@@ -42,7 +42,7 @@ public class TestGen {
         }
         
         for(ViewModel viewModel : dataModel.getViewList()) {
-            GenViewClass(viewModel);
+            GenTestViewClass(viewModel);
         }
     }
     
@@ -60,22 +60,23 @@ public class TestGen {
         
         
         testGetterSetter.addStatement("$T calendar=$T.getInstance()", ClassName.get(Calendar.class),ClassName.get(Calendar.class));
+        testGetterSetter.addStatement("long val$L=$LL", "Id",(long)(Math.random()*10000));
         
         for (FieldModel fm : objectModel.getFields()) {
             String sType=fm.getType();
             if(sType.equals("String")) {
                 testGetterSetter.addStatement("$T val$L=$S", ClassName.get(String.class),fm.getName(),UUID.randomUUID().toString());
             } else if(sType.equals("int")) {
-                testGetterSetter.addStatement("$T val$L=$L", ClassName.get(Integer.class),fm.getName(),(int)(Math.random()*100));
+                testGetterSetter.addStatement("int val$L=$L", fm.getName(),(int)(Math.random()*100));
             } else if(sType.equals("double")) {
-                testGetterSetter.addStatement("$T val$L=$L", ClassName.get(Double.class),fm.getName(),(Math.random()*100));
+                testGetterSetter.addStatement("double val$L=$L", fm.getName(),(Math.random()*100));
             } else if(sType.equals("Date")) {
                 testGetterSetter.addStatement("calendar.set($L,$L,$L,$L,$L,$L)", (int)Math.round(Math.random()*20+100), (int)Math.round(Math.random()*11+1), (int)Math.round(Math.random()*28), (int)Math.round(Math.random()*24), (int)Math.round(Math.random()*60), (int)Math.round(Math.random()*60));
                 testGetterSetter.addStatement("$T val$L=calendar.getTime()", ClassName.get(Date.class),fm.getName());
-            } else if(sType.equals("boolean")) {
-                testGetterSetter.addStatement("$T val$L=$L", ClassName.get(Boolean.class),fm.getName(),(Math.random()>0.5));
+            } else if(sType.equals("boolean")) {                
+                testGetterSetter.addStatement("boolean val$L=$L", fm.getName(),(Math.random()>0.5));
             } else if(sType.equals("long")) {
-                testGetterSetter.addStatement("$T val$L=$LL", ClassName.get(Long.class),fm.getName(),(long)(Math.random()*10000));
+                testGetterSetter.addStatement("long val$L=$LL", fm.getName(),(long)(Math.random()*10000));
             } else {
                 testGetterSetter.addStatement("$T val$L=$S", ClassName.get(String.class),fm.getName(),UUID.randomUUID().toString());
             }            
@@ -86,8 +87,26 @@ public class TestGen {
             testGetterSetter.addStatement("obj.set$L(val$L)", fm.getName(),fm.getName());
         }
 
+        testGetterSetter.addStatement("$T.assertEquals($S,(long)(obj.getId()),valId)",ClassName.get("junit.framework","Assert"),"Id");
+
         for (FieldModel fm : objectModel.getFields()) {
-            testGetterSetter.addStatement("$T.assertEquals(obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName());
+            String sType=fm.getType();
+            if(sType.equals("String")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName(),fm.getName());
+            } else if(sType.equals("int")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,(int)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName(),fm.getName());
+            } else if(sType.equals("double")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,(double)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName(),fm.getName());
+            } else if(sType.equals("Date")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName(),fm.getName());
+            } else if(sType.equals("boolean")) {                
+                testGetterSetter.addStatement("$T.assertEquals($S,(boolean)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName(),fm.getName());
+            } else if(sType.equals("long")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,(long)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName(),fm.getName());
+            } else {
+                testGetterSetter.addStatement("$T.assertEquals($S,obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName(),fm.getName());
+            }            
+
         }
         
         objectJavaClassBuilder.addMethod(testGetterSetter.build());
@@ -98,7 +117,7 @@ public class TestGen {
         javaFile.writeTo(new File(GlobalSettings.TEST_OUT_DIR));        
     }
 
-    private void GenViewClass(ViewModel viewModel) throws IOException {
+    private void GenTestViewClass(ViewModel viewModel) throws IOException {
         TypeSpec.Builder objectJavaClassBuilder = TypeSpec.classBuilder("Test"+viewModel.getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.junit.runner","RunWith"))
@@ -115,31 +134,49 @@ public class TestGen {
         
         for (ViewColumn fm : viewModel.getColumns()) {
             String sType=fm.getType();
+            String sName=(fm.getName().equals("_id"))?"Id":fm.getName();
             if(sType.equals("String")) {
-                testGetterSetter.addStatement("$T val$L=$S", ClassName.get(String.class),fm.getName(),UUID.randomUUID().toString());
+                testGetterSetter.addStatement("$T val$L=$S", ClassName.get(String.class),sName,UUID.randomUUID().toString());
             } else if(sType.equals("int")) {
-                testGetterSetter.addStatement("$T val$L=$L", ClassName.get(Integer.class),fm.getName(),(int)(Math.random()*100));
+                testGetterSetter.addStatement("int val$L=$L", sName,(int)(Math.random()*100));
             } else if(sType.equals("double")) {
-                testGetterSetter.addStatement("$T val$L=$L", ClassName.get(Double.class),fm.getName(),(Math.random()*100));
+                testGetterSetter.addStatement("double val$L=$L", sName,(Math.random()*100));
             } else if(sType.equals("Date")) {
                 testGetterSetter.addStatement("calendar.set($L,$L,$L,$L,$L,$L)", (int)Math.round(Math.random()*20+100), (int)Math.round(Math.random()*11+1), (int)Math.round(Math.random()*28), (int)Math.round(Math.random()*24), (int)Math.round(Math.random()*60), (int)Math.round(Math.random()*60));
-                testGetterSetter.addStatement("$T val$L=calendar.getTime()", ClassName.get(Date.class),fm.getName());
+                testGetterSetter.addStatement("$T val$L=calendar.getTime()", ClassName.get(Date.class),sName);
             } else if(sType.equals("boolean")) {
-                testGetterSetter.addStatement("$T val$L=$L", ClassName.get(Boolean.class),fm.getName(),(Math.random()>0.5));
+                testGetterSetter.addStatement("boolean val$L=$L", sName,(Math.random()>0.5));
             } else if(sType.equals("long")) {
-                testGetterSetter.addStatement("$T val$L=$LL", ClassName.get(Long.class),fm.getName(),(long)(Math.random()*10000));
+                testGetterSetter.addStatement("long val$L=$LL", sName,(long)(Math.random()*10000));
             } else {
-                testGetterSetter.addStatement("$T val$L=$S", ClassName.get(String.class),fm.getName(),UUID.randomUUID().toString());
+                testGetterSetter.addStatement("$T val$L=$S", ClassName.get(String.class),sName,UUID.randomUUID().toString());
             }            
         }
         testGetterSetter.addStatement("$T obj=new $T()", ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,viewModel.getName()),ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,viewModel.getName()));
         
         for (ViewColumn fm : viewModel.getColumns()) {
-            testGetterSetter.addStatement("obj.set$L(val$L)", fm.getName(),fm.getName());
+            String sName=(fm.getName().equals("_id"))?"Id":fm.getName();
+            testGetterSetter.addStatement("obj.set$L(val$L)", sName,sName);
         }
 
         for (ViewColumn fm : viewModel.getColumns()) {
-            testGetterSetter.addStatement("$T.assertEquals(obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), fm.getName(),fm.getName());
+            String sName=(fm.getName().equals("_id"))?"Id":fm.getName();
+            String sType=fm.getType();
+            if(sType.equals("String")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), sName,sName,sName);
+            } else if(sType.equals("int")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,(int)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), sName,sName,sName);
+            } else if(sType.equals("double")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,(double)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), sName,sName,sName);
+            } else if(sType.equals("Date")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), sName,sName,sName);
+            } else if(sType.equals("boolean")) {                
+                testGetterSetter.addStatement("$T.assertEquals($S,(boolean)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), sName,sName,sName);
+            } else if(sType.equals("long")) {
+                testGetterSetter.addStatement("$T.assertEquals($S,(long)(obj.get$L()),val$L)",ClassName.get("junit.framework","Assert"), sName,sName,sName);
+            } else {
+                testGetterSetter.addStatement("$T.assertEquals($S,obj.get$L(),val$L)",ClassName.get("junit.framework","Assert"), sName,sName,sName);
+            }            
         }
         
         objectJavaClassBuilder.addMethod(testGetterSetter.build());

@@ -265,8 +265,8 @@ public class ClassJavaGen {
             MethodSpec setField = MethodSpec.methodBuilder("set" + ((fm.getName().equals("_id"))?"Id":fm.getName()))
                     .addModifiers(Modifier.PUBLIC)
                     .returns(ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME, viewModel.getName()))
-                    .addParameter(fieldType, "p" + ((fm.getName().equals("_id"))?"Id":fm.getName()))
-                    .addStatement("this.m$L=p$L", ((fm.getName().equals("_id"))?"Id":fm.getName()), ((fm.getName().equals("_id"))?"Id":fm.getName()))
+                    .addParameter(fieldType, "_" + ((fm.getName().equals("_id"))?"Id":fm.getName()))
+                    .addStatement("this.m$L=_$L", ((fm.getName().equals("_id"))?"Id":fm.getName()), ((fm.getName().equals("_id"))?"Id":fm.getName()))
                     .addStatement("return this")
                     .build();
             objectJavaClassBuilder.addMethod(setField);
