@@ -37,15 +37,25 @@
     </object>
     <view name="PayList"  table="pays p" uri="pay/list">
         <column name="_id" expr="p._id"  type="long" />
+        <column name="Notes" expr="p.notes"  type="String" />
+        <column name="Value" expr="p.pay_value"  type="double" />
+        <column name="Created" expr="p.pay_date"  type="Date" />
+        <column name="AccountName" expr="a.name"  type="String" />
+        <column name="Currency" expr="a.currency"  type="String" />
+        <column name="CategoryName" expr="c.name"  type="String" />
+        <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" type="int" />
+        <join join="left outer join accounts a on p.account_id=a._id" />
+        <join join="left outer join categories c on p.category_id=c._id" />
+    </view>
+    <view name="PayListGson"  table="pays p" uri="pay/listGson">
+        <column name="_id" expr="p._id"  type="long" />
         <column name="Guid" expr="p.r_guid"  type="String" />
         <column name="Deleted" expr="p.deleted"  type="boolean" />
         <column name="Notes" expr="p.notes"  type="String" />
         <column name="Value" expr="p.pay_value"  type="double" />
         <column name="Created" expr="p.pay_date"  type="Date" />
-        <column name="AccountName" expr="a.name"  type="String" />
         <column name="AccountGuid" expr="a.r_guid"  type="String" />
         <column name="Currency" expr="a.currency"  type="String" />
-        <column name="CategoryName" expr="c.name"  type="String" />
         <column name="CategoryGuid" expr="c.r_guid"  type="String" />
         <column name="CategoryTheme" expr="IFNULL(c.theme_id,0)" type="int" />
         <column name="IsSystem" expr="p.is_system"  type="boolean" />
