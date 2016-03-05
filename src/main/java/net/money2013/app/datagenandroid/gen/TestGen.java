@@ -82,6 +82,7 @@ public class TestGen {
             }            
         }
         testGetSet.addStatement("$T obj=new $T()", ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName()),ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName()));
+        testGetSet.addStatement("obj.setId(valId)");
         
         for (FieldModel fm : objectModel.getFields()) {
             testGetSet.addStatement("obj.set$L(val$L)", fm.getName(),fm.getName());
