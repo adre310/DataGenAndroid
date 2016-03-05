@@ -187,6 +187,8 @@ public class ClassJavaGen {
                 .addParameter(GlobalSettings.PARCEL_CLASS,"in")
                 ;
 
+        constrParcel.addStatement("mId=$T.ParcelToLong(in)", GlobalSettings.BLL_CONVERTER_CLASS);
+        
         for (FieldModel fieldModel : objectModel.getFields()) {
             constrParcel.addStatement("m$L=$T.ParcelTo$L(in)", fieldModel.getName(), GlobalSettings.BLL_CONVERTER_CLASS, Utils.getPrefixByName(fieldModel.getType()));
         }
@@ -200,6 +202,7 @@ public class ClassJavaGen {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID);
 
+        writeParcel.addStatement("$T.ObjectToParcel(out,mId)", GlobalSettings.BLL_CONVERTER_CLASS);
         for (FieldModel fieldModel : objectModel.getFields()) {
             writeParcel.addStatement("$T.ObjectToParcel(out,m$L)", GlobalSettings.BLL_CONVERTER_CLASS, fieldModel.getName());
         }
