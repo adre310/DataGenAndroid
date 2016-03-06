@@ -22,7 +22,10 @@ public class ViewModel {
 
     @Attribute(name="uri", required = true)
     private String msUri;
-        
+    
+    @Attribute(name = "isJson", required = false)
+    private boolean mbJson =false;
+    
     @ElementList(inline = true)
     private List<ViewColumn> mColumns = null;
 
@@ -66,5 +69,14 @@ public class ViewModel {
     public void setUri(String msUri) {
         this.msUri = msUri;
     }
+
+    public boolean isJson() {
+        return mbJson;
+    }
+
+    public void setJson(boolean mbJson) {
+        this.mbJson = mbJson;
+    }
    
+    
 }

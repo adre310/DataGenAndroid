@@ -26,5 +26,11 @@ public class ViewColumn {
     public String getType() {
         return msType;
     }
-        
+ 
+    @Attribute(name="json",required = false)
+    private String msJson="";
+    
+    public String getJson() {
+        return msJson;
+    }
 }

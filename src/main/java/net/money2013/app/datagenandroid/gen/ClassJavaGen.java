@@ -5,6 +5,7 @@
  */
 package net.money2013.app.datagenandroid.gen;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -254,22 +255,29 @@ public class ClassJavaGen {
 
         for (ViewColumn fm : viewModel.getColumns()) {
             Class fieldType = Utils.getTypeByName(fm.getType());
-            FieldSpec fieldSpec = FieldSpec.builder(fieldType, "m" + ((fm.getName().equals("_id"))?"Id":fm.getName()), Modifier.PRIVATE)
-                    .build();
-            objectJavaClassBuilder.addField(fieldSpec);
+            String sName=(fm.getName().equals("_id"))?"Id":fm.getName();
+            FieldSpec.Builder fieldSpec = FieldSpec.builder(fieldType, "m" + sName, Modifier.PRIVATE);
+                   
+            if(viewModel.isJson()) {
+                fieldSpec.addAnnotation(AnnotationSpec.builder(ClassName.get("com.google.gson.annotations","SerializedName"))
+                        .addMember("value", "$S", fm.getJson().isEmpty()?sName:fm.getJson())
+                        .build()
+                );
+            }
+            objectJavaClassBuilder.addField(fieldSpec.build());
 
-            MethodSpec getField = MethodSpec.methodBuilder("get" + ((fm.getName().equals("_id"))?"Id":fm.getName()))
+            MethodSpec getField = MethodSpec.methodBuilder("get" + sName)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(fieldType)
-                    .addStatement("return this.m" + ((fm.getName().equals("_id"))?"Id":fm.getName()))
+                    .addStatement("return this.m" + sName)
                     .build();
             objectJavaClassBuilder.addMethod(getField);
 
-            MethodSpec setField = MethodSpec.methodBuilder("set" + ((fm.getName().equals("_id"))?"Id":fm.getName()))
+            MethodSpec setField = MethodSpec.methodBuilder("set" + sName)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME, viewModel.getName()))
-                    .addParameter(fieldType, "_" + ((fm.getName().equals("_id"))?"Id":fm.getName()))
-                    .addStatement("this.m$L=_$L", ((fm.getName().equals("_id"))?"Id":fm.getName()), ((fm.getName().equals("_id"))?"Id":fm.getName()))
+                    .addParameter(fieldType, "_" + sName)
+                    .addStatement("this.m$L=_$L", sName, sName)
                     .addStatement("return this")
                     .build();
             objectJavaClassBuilder.addMethod(setField);
