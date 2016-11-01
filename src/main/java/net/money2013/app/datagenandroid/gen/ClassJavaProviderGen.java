@@ -55,6 +55,7 @@ public class ClassJavaProviderGen {
         genInsert(objectJavaClassBuilder);
         genUpdate(objectJavaClassBuilder);
         genDelete(objectJavaClassBuilder);
+        genLazyInit(objectJavaClassBuilder);
         
         JavaFile javaFile = JavaFile.builder(GlobalSettings.PROVIDER_PACKAGE_NAME, objectJavaClassBuilder.build())
                 .build();
@@ -147,7 +148,6 @@ public class ClassJavaProviderGen {
                     .addModifiers(Modifier.PUBLIC)
                     .returns(boolean.class)
                     .addStatement("instance=this")
-                    .addStatement("(($T)(getContext().getApplicationContext())).appComponent().inject(this)", GlobalSettings.APP_MAIN_CLASS)
                     .addStatement("return true")
                     .build()
         );
@@ -161,6 +161,7 @@ public class ClassJavaProviderGen {
                     .addParameter(GlobalSettings.URI_CLASS, "uri")
                     .addParameter(GlobalSettings.CONTENT_VALUE_CLASS,"values")
                 ;
+        insertMethod.addStatement("lazyInit()");
         insertMethod.addStatement("final int match = uriMatcher.match(uri)");
         insertMethod.addStatement("long rowId = -1");
         insertMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
@@ -192,6 +193,7 @@ public class ClassJavaProviderGen {
                     .addParameter(String[].class,"selectionArgs")
                     .addParameter(String.class,"sortOrder")
                 ;
+        queryMethod.addStatement("lazyInit()");
         queryMethod.addStatement("$T database = dbOpenHelper.getReadableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
         queryMethod.addStatement("$T qb = new $T()", GlobalSettings.SQL_BUILDER_CLASS, GlobalSettings.SQL_BUILDER_CLASS);
         queryMethod.addStatement("$T cursor = null", GlobalSettings.CURSOR_CLASS);
@@ -238,6 +240,7 @@ public class ClassJavaProviderGen {
                     .addParameter(String[].class,"selectionArgs")
                 ;
 
+        updateMethod.addStatement("lazyInit()");
         updateMethod.addStatement("final int match = uriMatcher.match(uri)");
         updateMethod.addStatement("int count = 0");
         updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
@@ -263,6 +266,7 @@ public class ClassJavaProviderGen {
                     .addParameter(String[].class,"selectionArgs")
                 ;
 
+        updateMethod.addStatement("lazyInit()");
         updateMethod.addStatement("final int match = uriMatcher.match(uri)");
         updateMethod.addStatement("int count = 0");
         updateMethod.addStatement("$T database = dbOpenHelper.getWritableDatabase()",GlobalSettings.SQL_DATABASE_CLASS);
@@ -277,5 +281,12 @@ public class ClassJavaProviderGen {
         updateMethod.addStatement("return count");
         classBuilder.addMethod(updateMethod.build());
     }    
-    
+
+    private void genLazyInit(TypeSpec.Builder classBuilder) {
+        MethodSpec.Builder lazyMethod=MethodSpec.methodBuilder("lazyInit")
+                    .addModifiers(Modifier.PRIVATE)
+                ;
+        
+        classBuilder.addMethod(lazyMethod.build());
+    }
 }
