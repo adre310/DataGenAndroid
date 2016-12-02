@@ -43,10 +43,6 @@ public class ClassJavaProviderGen {
                 FieldSpec.builder(GlobalSettings.SQL_HELPER_CLASS, "dbOpenHelper")
                     .addAnnotation(GlobalSettings.INJECT_CLASS)
                     .build());
-        objectJavaClassBuilder.addField(
-                FieldSpec.builder(ClassName.get(GlobalSettings.PROVIDER_PACKAGE_NAME,"MoneyProvider"), "instance", Modifier.PUBLIC, Modifier.STATIC)
-                    .initializer("null")
-                    .build());
         
         genGetType(objectJavaClassBuilder);
         genStatic(objectJavaClassBuilder);
@@ -147,7 +143,6 @@ public class ClassJavaProviderGen {
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(boolean.class)
-                    .addStatement("instance=this")
                     .addStatement("return true")
                     .build()
         );
@@ -286,7 +281,7 @@ public class ClassJavaProviderGen {
         MethodSpec.Builder lazyMethod=MethodSpec.methodBuilder("lazyInit")
                     .addModifiers(Modifier.PRIVATE)
                 ;
-        
+        lazyMethod.addStatement("$T.getAppComponent().inject(this)", GlobalSettings.APP_MAIN_CLASS);
         classBuilder.addMethod(lazyMethod.build());
     }
 }
