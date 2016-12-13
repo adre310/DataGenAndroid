@@ -127,10 +127,10 @@ public class ClassJavaProviderGen {
         getTypeMethod.addStatement("final int match = uriMatcher.match(uri)");
         getTypeMethod.beginControlFlow("switch (match)");
         for(ObjectModel objectModel : dataModel.getObjects()) {
-            getTypeMethod.addStatement("case $L: return $S", "ID_"+objectModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+objectModel.getName());
+            getTypeMethod.addStatement("case $L: return $S", "ID_"+objectModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+objectModel.getName().toLowerCase());
         }
         for(ViewModel viewModel : dataModel.getViewList()) {
-            getTypeMethod.addStatement("case $L: return $S", "ID_"+viewModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+viewModel.getName());
+            getTypeMethod.addStatement("case $L: return $S", "ID_"+viewModel.getName().toUpperCase(),"vnd.android.cursor.dir/vnd.money2013."+viewModel.getName().toLowerCase());
         }
         getTypeMethod.addStatement("default: throw new $T($S + uri)", IllegalArgumentException.class, "Unknown URI ");
         getTypeMethod.endControlFlow();

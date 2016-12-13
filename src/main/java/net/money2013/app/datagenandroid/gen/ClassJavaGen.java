@@ -372,7 +372,7 @@ public class ClassJavaGen {
                 .addAnnotation(Override.class)
                 .addAnnotation(GlobalSettings.NON_NULL_CLASS)
                 .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(GlobalSettings.NON_NULL_CLASS).build())
-                .addStatement("return $T.builder().uri($T.CONTENT_URI).where($S).whereArgs($T.toString(object.getId())).build()", GlobalSettings.UPDATE_QUERY_CLASS, metaClass, "_id = ?", Long.class);
+                .addStatement("return $T.builder().uri($T.CONTENT_URI).where($T.COL_GUID+$S).whereArgs(object.getGuid()).build()", GlobalSettings.UPDATE_QUERY_CLASS, metaClass, metaClass, " = ?");
 
         objectJavaClassBuilder.addMethod(mapToUpdateQuery.build());
 
@@ -416,7 +416,7 @@ public class ClassJavaGen {
                 .addAnnotation(Override.class)
                 .addAnnotation(GlobalSettings.NON_NULL_CLASS)
                 .addParameter(ParameterSpec.builder(modelClass, "object").addAnnotation(GlobalSettings.NON_NULL_CLASS).build())
-                .addStatement("return $T.builder().uri($T.CONTENT_URI).where($S).whereArgs($T.toString(object.getId())).build()", GlobalSettings.DELETE_QUERY_CLASS, metaClass, "_id = ?", Long.class);
+                .addStatement("return $T.builder().uri($T.CONTENT_URI).where($T.COL_GUID+$S).whereArgs(object.getGuid()).build()", GlobalSettings.DELETE_QUERY_CLASS, metaClass, metaClass, " = ?");
 
         objectJavaClassBuilder.addMethod(mapToDeleteQuery.build());
 
