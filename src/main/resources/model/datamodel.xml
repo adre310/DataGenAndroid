@@ -85,7 +85,7 @@
         <column name="Theme" expr="c.theme_id" type="int" json="style" />
     </view>
     <view name="ReportByCategory" table="categories c" groupBy="c.name,a.currency" uri="pay/report_by_category">
-        <column name="_id" expr="c.name"  type="String" />
+        <column name="_id" expr="c._id"  type="Long" />
         <column name="Category" expr="c.name"  type="String" />
         <column name="Currency" expr="a.currency"  type="String" />
         <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)"  type="double"/>
