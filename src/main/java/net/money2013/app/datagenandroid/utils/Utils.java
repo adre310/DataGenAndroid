@@ -21,21 +21,22 @@ public class Utils {
 		return "TEXT";
 	}
         
-        public static Class getTypeByName(String sType) {
-            if(sType.equals("String"))
+        public static Class getTypeByName(String sType) throws Exception {
+            String lowerType=sType.toLowerCase();
+            if(lowerType.equals("string"))
                 return String.class;
-            if(sType.equals("int"))
+            if(lowerType.equals("int"))
 		return int.class;
-            if(sType.equals("double"))
+            if(lowerType.equals("double"))
 		return double.class;
-            if(sType.equals("Date"))
+            if(lowerType.equals("date"))
 		return Date.class;
-            if(sType.equals("boolean"))
+            if(lowerType.equals("boolean"))
 		return boolean.class;
-            if(sType.equals("long"))
+            if(lowerType.equals("long"))
 		return long.class;
             else
-		return String.class;            
+		throw new Exception("Inalid sType "+sType);            
         }
 
         public static String getPrefixByName(String sType) {

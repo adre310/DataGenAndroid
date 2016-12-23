@@ -109,13 +109,6 @@ public class TestGen {
             }            
 
         }
-
-        testGetSet.addStatement("$T parcel=$T.obtain()", GlobalSettings.PARCEL_CLASS,GlobalSettings.PARCEL_CLASS);
-        testGetSet.addStatement("parcel.setDataPosition(0)");
-        testGetSet.addStatement("obj.writeToParcel(parcel,0)");
-        testGetSet.addStatement("parcel.setDataPosition(0)");
-        testGetSet.addStatement("$T restoreObj=$T.CREATOR.createFromParcel(parcel)",ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName()),ClassName.get(GlobalSettings.MODEL_PACKAGE_NAME,objectModel.getName()));
-        testGetSet.addStatement("assertEquals(obj,restoreObj)");
         
         objectJavaClassBuilder.addMethod(testGetSet.build());
         
