@@ -106,4 +106,14 @@
         <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" type="double"/>
         <join join="inner join accounts a on a._id=p.account_id AND a.deleted=0" />
     </view>    
+    <view name="ReportByCategoryMonth" table="pays p" groupBy="a.currency,c.name,p.pay_year,p.pay_month" uri="pay/report_by_category_month">
+        <column name="_id" expr="p.pay_year*100+p.pay_month"  type="long" />
+        <column name="Currency" expr="a.currency" type="String"/>
+        <column name="Category" expr="c.name" type="String"/>
+        <column name="Year" expr="p.pay_year" type="int"/>
+        <column name="Month" expr="p.pay_month" type="int"/>
+        <column name="Balance" expr="IFNULL(SUM(p.pay_value),0)" type="double"/>
+        <join join="inner join accounts a on a._id=p.account_id AND a.deleted=0" />
+        <join join="inner join category c on c._id=p.category_id AND c.deleted=0" />
+    </view>    
 </model>
